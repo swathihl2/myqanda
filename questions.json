@@ -1,0 +1,68 @@
+{
+    "categories": {
+
+
+        "Common Questions": [
+
+            {
+                "question": "Tell me about your self?",
+                "answer": ""
+            },
+
+            {
+                "question": "What is prototypal inheritance?",
+                "answer": "Inheritance where an object can inherit from another object."
+            }
+
+
+        ],
+
+
+
+
+        "Technical Questions": [
+            {
+                "question": "What is a closure?",
+                "answer": "A function retaining access to its lexical scope."
+            },
+            {
+                "question": "What is prototypal inheritance?",
+                "answer": "Inheritance where an object can inherit from another object."
+            }
+        ],
+
+
+
+
+
+
+        "Behavioral Questions": [
+            {
+                "question": "Describe a work challenge.",
+                "answer": "I met tight deadlines by prioritizing tasks and clear communication."
+            },
+            {
+                "question": "How do you handle criticism?",
+                "answer": "I see it as an opportunity for growth and improvement."
+            }
+        ],
+
+
+
+
+
+
+
+
+        "Situation based Questions": [
+            {
+                "question": "Describe a work challenge.",
+                "answer": "I met tight deadlines by prioritizing tasks and clear communication."
+            },
+            {
+                "question": "How do you handle criticism?",
+                "answer": "I see it as an opportunity for growth and improvement."
+            }
+        ]
+    }
+}
