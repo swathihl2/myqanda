@@ -19,3 +19,15 @@
         and I thrive in collaborative environments, always aiming to be a good team player. Outside of work, 
         I enjoy reading books, keeping up with the latest tech trends, and playing badminton.
 
+## How do you handle tight deadlines?
+         
+         I handle tight deadlines by prioritizing tasks and maintaining clear communication with my team.
+         I break projects into smaller, manageable parts and focus on delivering high-priority items first.
+         Staying organized and being flexible in my approach also helps me adapt to any changes that may arise.
+
+## What motivates you in your work?
+
+
+         I’m motivated by the opportunity to solve complex problems and create impactful solutions.
+         I find satisfaction in seeing how my work enhances user experiences and contributes to a team’s success.
+         Continuous learning and professional growth also drive my passion for technology.
