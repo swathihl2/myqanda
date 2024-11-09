@@ -1,5 +1,6 @@
 
-1. Tell me about yorself ?
+## 1. Tell me about yorself ?
+   
         I’m a Front-End Software Engineer with over 2 and a half years of experience at Cerner Oracle. 
         In my role, I’ve gained hands-on expertise in technologies such as React, JavaScript, TypeScript, HTML, CSS, and Ruby. I’ve worked extensively on maintaining and enhancing the Power Chart application and have managed several JS and Ruby server projects. 
         I’m also experienced in creating automation tests using WDIO, working on Jenkins CI/CD pipelines, and integrating REST APIs. 
