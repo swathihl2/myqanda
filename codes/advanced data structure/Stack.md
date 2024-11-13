@@ -47,28 +47,3 @@ Stacks are used in problems like balancing parentheses, parsing expressions, and
 
 
 
-```python
-st = []
-
-def pop():
-    return st.pop()
-
-def push(ele):
-    st.append(ele)
-
-def peek():
-    if not is_empty():
-        return stack[-1]
-    else:
-        return "Stack is empty"
-
-def is_empty():
-    return len(self.stack) == 0 
-
-
-push(10)
-pop()
-peek()
-
-
-```
