@@ -45,6 +45,14 @@ trie.insert("hell")
 trie.insert("he")
 
 print(trie.search("hello"))  # Output: True
+
+```
+
+Explanation:
+
+A Trie (or Prefix Tree) is a tree-based data structure that stores a set of strings, where each node represents a common prefix of the strings.
+The insert() method adds a word, search() checks if a word exists in the trie, and starts_with() checks if there is any word with a given prefix.
+Tries are efficient for searching and prefix matching in dictionaries or autocomplete systems.
 print(trie.search("hell"))   # Output: True
 print(trie.search("he"))     # Output: True
 print(trie.search("hero"))   # Output: False
