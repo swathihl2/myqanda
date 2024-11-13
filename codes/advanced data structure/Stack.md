@@ -44,3 +44,31 @@ Explanation:
 The stack is implemented using a Python list (stack).
 push() adds an item to the stack, pop() removes and returns the item at the top, and peek() shows the top item without removing it.
 Stacks are used in problems like balancing parentheses, parsing expressions, and more.
+
+
+
+```python
+st = []
+
+def pop():
+    return st.pop()
+
+def push(ele):
+    st.append(ele)
+
+def peek():
+    if not is_empty():
+        return stack[-1]
+    else:
+        return "Stack is empty"
+
+def is_empty():
+    return len(self.stack) == 0 
+
+
+push(10)
+pop()
+peek()
+
+
+```
