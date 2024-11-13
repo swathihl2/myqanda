@@ -29,3 +29,14 @@ The threading module is used to create threads in Python. Threads can run concur
     thread2.join()
     
     print("Both tasks are completed.")
+
+
+Explanation:
+
+threading.Thread creates a thread to execute a function in parallel.
+The start() method initiates the threads.
+The join() method blocks the main thread until the threads complete their tasks.
+Here, tasks are run concurrently, meaning the Python interpreter switches between the tasks (due to the sleep calls), but they still share the same CPU core.
+
+Limitations of Concurrency (with Threads):
+Python’s Global Interpreter Lock (GIL) prevents multiple threads from executing Python bytecode at the same time in a single process (especially CPU-bound tasks). Threads in Python are ideal for I/O-bound tasks, where waiting on I/O (like file or network operations) allows other threads to run.
