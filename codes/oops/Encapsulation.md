@@ -5,6 +5,7 @@ Encapsulation is the concept of restricting access to some of an object's compon
 Public members are accessible from outside the class.
 Private members are hidden and cannot be accessed directly from outside the class.
 
+```python
     class BankAccount:
         def __init__(self, owner, balance):
             self.owner = owner  # Public attribute
