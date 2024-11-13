@@ -1,10 +1,5 @@
-# Advanced Data Structures in Python: Examples and Explanation
 
-In addition to basic data structures like lists, tuples, sets, and dictionaries, Python also supports more advanced data structures that are useful in solving complex problems efficiently. These structures are typically found in algorithmic challenges, system design, and optimization tasks. Below are some advanced data structures along with explanations and Python code examples:
-
----
-
-### 1. Linked List
+## 1. Linked List
 
 A **Linked List** is a linear data structure where each element (node) points to the next element in the sequence. Linked lists are used to implement other data structures like stacks, queues, and graphs.
 
