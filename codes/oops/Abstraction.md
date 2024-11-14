@@ -2,7 +2,7 @@
 
 Abstraction involves hiding the complex implementation details and showing only the essential features of an object. In Python, abstraction is implemented using abstract base classes (ABC).
 
-```c
+```python
     from abc import ABC, abstractmethod
     
     class Vehicle(ABC):
