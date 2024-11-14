@@ -2,7 +2,7 @@
 
 Abstraction involves hiding the complex implementation details and showing only the essential features of an object. In Python, abstraction is implemented using abstract base classes (ABC).
 
-```c
+```python
     from abc import ABC, abstractmethod
     
     class Vehicle(ABC):
@@ -23,7 +23,7 @@ Abstraction involves hiding the complex implementation details and showing only 
     
     class Bike(Vehicle):
         def start(self):
-            printf("Bike engine started.")
+            print("Bike engine started.")
     
         def stop(self):
             print("Bike stopped.")
@@ -36,5 +36,14 @@ Abstraction involves hiding the complex implementation details and showing only 
     bike.stop()  # Output: Bike stopped.
 ```
 
+```c
+// Online C compiler to run C program online
+#include <stdio.h>
 
+int main() {
+    // Write C code here
+    printf("Try programiz.pro");
+
+    return 0;
+}
 ```
