@@ -672,155 +672,1780 @@ Here are the answers to the next set of questions:
          # Output: ('red', 'small'), ('red', 'large'), ('blue', 'small'), ('blue', 'large')
          ```
 
+Here are the answers for the next set of questions:
+
+---
+
 ### 21. **What is the difference between `async def` and `def` in Python?**
-   - **Follow-up**: Can you explain the `await` keyword and how it works with `asyncio`? Provide an example of asynchronous code.
+   - **Answer**: 
+     - **`async def`**: Defines an **asynchronous function** that can be paused and resumed. This allows the function to perform tasks asynchronously, which is ideal for IO-bound operations like reading from a file or making HTTP requests. An `async` function returns a coroutine object that can be executed using `await`.
+     - **`def`**: Defines a regular (synchronous) function that runs in a blocking manner, i.e., it will wait for one operation to finish before moving on to the next one.
+
+     Example:
+     ```python
+     async def async_example():
+         print("Start")
+         await asyncio.sleep(1)  # Non-blocking wait
+         print("End")
+
+     # Regular function
+     def sync_example():
+         print("Start")
+         time.sleep(1)  # Blocking wait
+         print("End")
+     ```
+
+   - **Follow-up**: **Can you explain the `await` keyword and how it works with `asyncio`? Provide an example of asynchronous code.**
+     - **Answer**: 
+       The `await` keyword is used to pause the execution of an **async function** until the awaited coroutine finishes its task. The `await` keyword can only be used inside an `async` function, and it is typically used to call asynchronous operations like network requests, database queries, or file I/O.
+
+       Example:
+       ```python
+       import asyncio
+
+       async def fetch_data():
+           print("Start fetching")
+           await asyncio.sleep(2)  # Simulate an I/O-bound task
+           print("Data fetched")
+           return "Data"
+
+       async def main():
+           print("Before fetching")
+           data = await fetch_data()
+           print("After fetching:", data)
+
+       # Run the async function using asyncio
+       asyncio.run(main())
+       ```
+
+       **Explanation**: 
+       - `asyncio.run(main())` runs the `main()` function which is asynchronous.
+       - Inside `main()`, `await fetch_data()` pauses the execution until `fetch_data()` completes its task.
+
+---
 
 ### 22. **How do you handle large datasets in Python without running out of memory?**
-   - **Follow-up**: What strategies would you use to process large files or streams of data efficiently (e.g., using generators, memory mapping)?
+   - **Answer**: 
+     Handling large datasets can be challenging when memory is limited, but Python offers several strategies to handle large datasets efficiently:
+     
+     1. **Generators**: Generators allow you to iterate through data one element at a time, keeping only the current item in memory, making them memory-efficient for processing large datasets.
+     
+     2. **Streaming Data**: If the data is coming from a file or a network stream, process it in chunks rather than loading it all at once.
+     
+     3. **Using `pandas` with `chunksize`**: When working with large CSV files or dataframes, `pandas` supports reading data in chunks, which can help avoid memory overflow.
+     
+     4. **Memory-Mapped Files**: Use the `mmap` module for memory-mapped files, which allows you to read and write large files directly without loading them entirely into memory.
+
+   - **Follow-up**: **What strategies would you use to process large files or streams of data efficiently (e.g., using generators, memory mapping)?**
+     - **Answer**: 
+       - **Generators**: If the data can be processed in a sequence (like reading lines from a file), using a generator to yield data one at a time helps avoid loading everything into memory.
+         Example:
+         ```python
+         def read_large_file(file_path):
+             with open(file_path, 'r') as file:
+                 for line in file:
+                     yield line.strip()  # Yield each line, one at a time
+         
+         for line in read_large_file('large_file.txt'):
+             # Process each line one by one
+             pass
+         ```
+
+       - **Memory-Mapping**: Use `mmap` to handle large binary or text files without loading the whole file into memory.
+         Example:
+         ```python
+         import mmap
+
+         def process_large_file(file_path):
+             with open(file_path, 'r') as f:
+                 mmapped_file = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+                 # Process data in the mmap object, like a string or bytes array
+                 print(mmapped_file[:100])  # First 100 bytes
+                 mmapped_file.close()
+         ```
+
+---
 
 ### 23. **How would you implement a singleton pattern in Python?**
-   - **Follow-up**: What are the pros and cons of implementing a singleton using the `__new__` method versus a metaclass?
+   - **Answer**: 
+     The Singleton pattern ensures that a class has only one instance, providing a global point of access to it. There are several ways to implement a Singleton in Python.
+
+     1. **Using `__new__` method**:
+        You can override the `__new__` method to control the creation of instances. If an instance already exists, return the existing one.
+        
+        Example:
+        ```python
+        class Singleton:
+            _instance = None
+
+            def __new__(cls):
+                if cls._instance is None:
+                    cls._instance = super(Singleton, cls).__new__(cls)
+                return cls._instance
+
+        singleton1 = Singleton()
+        singleton2 = Singleton()
+        print(singleton1 is singleton2)  # True
+        ```
+
+     2. **Using a metaclass**:
+        You can use a metaclass to control the creation of the class itself and ensure only one instance exists.
+
+     - **Follow-up**: **What are the pros and cons of implementing a singleton using the `__new__` method versus a metaclass?**
+       - **Answer**: 
+         - **`__new__` method**:
+           - **Pros**: Simple to implement; widely used in Python.
+           - **Cons**: Less flexible compared to metaclasses, as it doesn't allow as much control over class creation.
+         
+         - **Metaclass**:
+           - **Pros**: More control over class creation and behavior; more flexible for complex use cases.
+           - **Cons**: Adds complexity and might be harder to understand for some developers.
+
+---
 
 ### 24. **Explain how Python's `property` decorator works. How is it different from regular method calls?**
-   - **Follow-up**: Can you demonstrate an example of using `property` to manage attribute access?
+   - **Answer**: 
+     The `property` decorator in Python allows you to define methods that behave like attributes. It provides a way to customize access to instance variables, adding getter, setter, and deleter functionality while keeping the access syntax clean (without needing to call methods directly).
+
+     Example:
+     ```python
+     class Circle:
+         def __init__(self, radius):
+             self._radius = radius
+
+         @property
+         def radius(self):
+             return self._radius
+
+         @radius.setter
+         def radius(self, value):
+             if value <= 0:
+                 raise ValueError("Radius must be positive")
+             self._radius = value
+
+     circle = Circle(10)
+     print(circle.radius)  # Accessing the radius property
+     circle.radius = 5  # Setting the radius using the setter
+     ```
+
+     **Difference from regular method calls**: 
+     - `property` allows you to access methods as if they were attributes, so you don’t need to explicitly call the getter and setter methods using parentheses.
+     - Regular methods require explicit calls using parentheses (`object.method()`), whereas properties allow you to access them like attributes (`object.attribute`).
+
+   - **Follow-up**: **Can you demonstrate an example of using `property` to manage attribute access?**
+     - **Answer**: 
+       Here's an example of managing a `temperature` attribute where we convert it from Celsius to Fahrenheit using a property.
+       ```python
+       class Temperature:
+           def __init__(self, celsius):
+               self._celsius = celsius
+
+           @property
+           def celsius(self):
+               return self._celsius
+
+           @celsius.setter
+           def celsius(self, value):
+               if value < -273.15:
+                   raise ValueError("Temperature cannot be below absolute zero")
+               self._celsius = value
+
+           @property
+           def fahrenheit(self):
+               return (self._celsius * 9/5) + 32
+
+       temp = Temperature(25)
+       print(temp.celsius)  # 25
+       print(temp.fahrenheit)  # 77.0
+       temp.celsius = 30  # Change Celsius value
+       print(temp.fahrenheit)  # 86.0
+       ```
+
+---
 
 ### 25. **What is the `functools.partial` function, and how is it used?**
-   - **Follow-up**: Can you give an example of a scenario where `partial` is useful for currying functions?
+   - **Answer**: 
+     The `functools.partial` function allows you to create a new function with one or more arguments "frozen" to specific values. It essentially lets you create a **curried version** of an existing function, which can be useful when you need to reuse a function with some pre-defined arguments.
+
+     Example:
+     ```python
+     from functools import partial
+
+     def power(base, exponent):
+         return base ** exponent
+
+     square = partial(power, exponent=2)  # Create a function that squares a number
+     print(square(5))  # Output: 25
+     ```
+
+   - **Follow-up**: **Can you give an example of a scenario where `partial` is useful for currying functions?**
+     - **Answer**: 
+       Currying with `partial` is useful when you need to repeatedly call a function with the same arguments.
+       
+       Example: In a scenario where you are working with a function that logs messages with a specific log level:
+       ```python
+
+
+       from functools import partial
+
+       def log_message(level, message):
+           print(f"[{level}] {message}")
+
+       info_logger = partial(log_message, "INFO")
+       error_logger = partial(log_message, "ERROR")
+
+       info_logger("This is an info message")
+       error_logger("This is an error message")
+       ```
+
+       In this case, `info_logger` and `error_logger` are partial functions with the `level` argument fixed, making it easier to log messages without repeating the log level each time.
+
+Here are the answers for the next set of questions:
+
+---
 
 ### 26. **How does Python handle function arguments passed by reference or value?**
-   - **Follow-up**: Can you explain how mutable and immutable types affect function argument passing in Python?
+   - **Answer**: 
+     Python uses a model called **"pass-by-object-reference"** (or **"pass-by-assignment"**). This means that when you pass a variable to a function, you are passing the reference to the object in memory, not the actual object itself. The behavior of the function depends on whether the object is mutable or immutable:
+     
+     - **Immutable types** (like integers, strings, and tuples): When you pass an immutable object to a function, it behaves like pass-by-value because you can't modify the original object; instead, a new object is created if modified.
+     - **Mutable types** (like lists, dictionaries, and sets): When you pass a mutable object, the function can modify the object, which will reflect in the caller, as they both refer to the same memory location.
+     
+   - **Follow-up**: **Can you explain how mutable and immutable types affect function argument passing in Python?**
+     - **Answer**: 
+       - **Immutable types**: If an immutable object is passed to a function and modified inside the function, the original object outside the function remains unchanged because immutable objects cannot be modified in-place.
+       - **Mutable types**: If a mutable object (like a list) is passed to a function, and you modify the object inside the function (e.g., appending or changing values), the changes will affect the object outside the function as well.
+
+       Example:
+       ```python
+       # Immutable (string)
+       def modify_string(s):
+           s = "New String"  # This creates a new string, not modifying the original one
+           return s
+
+       original_str = "Old String"
+       modify_string(original_str)
+       print(original_str)  # Output: Old String (unchanged)
+
+       # Mutable (list)
+       def modify_list(lst):
+           lst.append(4)  # Modifies the original list
+           
+       original_lst = [1, 2, 3]
+       modify_list(original_lst)
+       print(original_lst)  # Output: [1, 2, 3, 4] (modified)
+       ```
+
+---
 
 ### 27. **How would you implement a logging mechanism in Python?**
-   - **Follow-up**: What are some common practices when logging in production environments, including log levels, format, and rotating logs?
+   - **Answer**: 
+     Python provides the built-in `logging` module to implement logging mechanisms. This module provides a flexible framework for logging messages from different parts of the application at various severity levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
+     
+     Example of setting up basic logging:
+     ```python
+     import logging
+
+     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+     logging.debug("This is a debug message.")
+     logging.info("This is an info message.")
+     logging.warning("This is a warning message.")
+     logging.error("This is an error message.")
+     logging.critical("This is a critical message.")
+     ```
+
+   - **Follow-up**: **What are some common practices when logging in production environments, including log levels, format, and rotating logs?**
+     - **Answer**: 
+       - **Log Levels**: Use appropriate log levels to categorize messages:
+         - `DEBUG`: Detailed information for debugging.
+         - `INFO`: General runtime information.
+         - `WARNING`: Indication that something unexpected happened.
+         - `ERROR`: Something went wrong, but the program can continue.
+         - `CRITICAL`: Serious error, the program may not be able to continue.
+         
+       - **Log Format**: Include essential information like timestamp, log level, message, and possibly the function name.
+       - **Log Rotation**: Use `RotatingFileHandler` or `TimedRotatingFileHandler` to manage log file sizes and keep logs from growing indefinitely. 
+
+       Example:
+       ```python
+       from logging.handlers import RotatingFileHandler
+
+       handler = RotatingFileHandler('app.log', maxBytes=1000000, backupCount=5)
+       logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[handler])
+
+       logging.info("This is an info message.")
+       ```
+
+---
 
 ### 28. **What is Python's `unittest` module, and how would you use it to write tests for a class?**
-   - **Follow-up**: Can you explain the differences between `assertEqual`, `assertRaises`, and other assertion methods in `unittest`?
+   - **Answer**: 
+     The `unittest` module in Python provides a framework for writing and running tests. It supports test case creation, test organization, and running tests with built-in assertions.
+
+     Example:
+     ```python
+     import unittest
+
+     class MyClass:
+         def add(self, a, b):
+             return a + b
+
+     class TestMyClass(unittest.TestCase):
+         def test_add(self):
+             obj = MyClass()
+             self.assertEqual(obj.add(2, 3), 5)  # Assert that 2 + 3 equals 5
+
+     if __name__ == '__main__':
+         unittest.main()
+     ```
+
+   - **Follow-up**: **Can you explain the differences between `assertEqual`, `assertRaises`, and other assertion methods in `unittest`?**
+     - **Answer**: 
+       - **`assertEqual(a, b)`**: Tests if `a` and `b` are equal.
+       - **`assertRaises(exception, callable)`**: Tests if the `callable` raises the specified exception.
+       - **Other Assertions**:
+         - `assertTrue(x)`: Tests if `x` is `True`.
+         - `assertFalse(x)`: Tests if `x` is `False`.
+         - `assertIsNone(x)`: Tests if `x` is `None`.
+         - `assertIsInstance(x, class)`: Tests if `x` is an instance of `class`.
+
+       Example:
+       ```python
+       def test_divide(self):
+           with self.assertRaises(ZeroDivisionError):
+               1 / 0
+       ```
+
+---
 
 ### 29. **What is the difference between a shallow copy and a deep copy in Python? How do they behave with mutable objects?**
-   - **Follow-up**: How can you avoid shallow copy issues when working with nested data structures?
+   - **Answer**: 
+     - **Shallow Copy**: A shallow copy creates a new object, but does not recursively copy objects contained in it. For nested structures, it only copies references to the inner objects.
+     - **Deep Copy**: A deep copy creates a new object and recursively copies all objects contained in it, ensuring no shared references.
+
+     Example:
+     ```python
+     import copy
+
+     lst1 = [[1, 2], [3, 4]]
+     shallow_copy = copy.copy(lst1)
+     deep_copy = copy.deepcopy(lst1)
+
+     lst1[0][0] = 99
+     print(shallow_copy)  # Output: [[99, 2], [3, 4]] (shallow copy shares inner lists)
+     print(deep_copy)     # Output: [[1, 2], [3, 4]] (deep copy is unaffected)
+     ```
+
+   - **Follow-up**: **How can you avoid shallow copy issues when working with nested data structures?**
+     - **Answer**: 
+       Use `deepcopy()` from the `copy` module when working with nested data structures. If you're concerned about performance or large datasets, consider using an alternative approach like storing data in a format that avoids unnecessary nesting or using an immutable data structure (e.g., `tuple` instead of `list`).
+
+---
 
 ### 30. **What is the `async for` loop, and how does it work with asynchronous iterators?**
-   - **Follow-up**: Can you write an async generator that yields values after a delay?
+   - **Answer**: 
+     The `async for` loop is used to iterate over asynchronous iterators (i.e., objects that implement the `__aiter__()` and `__anext__()` methods). This allows for asynchronous iteration, making it useful for iterating over data that may require IO operations (e.g., reading from a network socket).
+
+     Example:
+     ```python
+     import asyncio
+
+     class AsyncIterator:
+         def __init__(self, start, end):
+             self.start = start
+             self.end = end
+
+         def __aiter__(self):
+             return self
+
+         async def __anext__(self):
+             if self.start >= self.end:
+                 raise StopAsyncIteration
+             self.start += 1
+             return self.start
+
+     async def main():
+         async for num in AsyncIterator(1, 5):
+             print(num)
+
+     asyncio.run(main())
+     ```
+
+   - **Follow-up**: **Can you write an async generator that yields values after a delay?**
+     - **Answer**: 
+       An async generator can be created using `yield` inside an `async def` function. The generator can be paused with `await` to simulate a delay.
+
+       Example:
+       ```python
+       import asyncio
+
+       async def delayed_numbers():
+           for i in range(5):
+               await asyncio.sleep(1)  # Delay of 1 second
+               yield i
+
+       async def main():
+           async for num in delayed_numbers():
+               print(num)
+
+       asyncio.run(main())
+       ```
+Here are the answers for the next set of questions:
+
+---
 
 ### 31. **What is the difference between `enumerate()` and `zip()` in Python?**
-   - **Follow-up**: How would you use `zip()` to transpose a matrix (list of lists)?
+   - **Answer**:
+     - **`enumerate()`**: This function adds a counter (index) to an iterable and returns an enumerate object. It's useful when you need both the index and the value of items in an iterable.
+       ```python
+       lst = ['a', 'b', 'c']
+       for index, value in enumerate(lst):
+           print(index, value)
+       # Output:
+       # 0 a
+       # 1 b
+       # 2 c
+       ```
+     - **`zip()`**: This function takes two or more iterables and combines them element-wise into tuples. If the iterables have different lengths, `zip` will stop at the shortest one.
+       ```python
+       lst1 = [1, 2, 3]
+       lst2 = ['a', 'b', 'c']
+       zipped = zip(lst1, lst2)
+       print(list(zipped))  # Output: [(1, 'a'), (2, 'b'), (3, 'c')]
+       ```
+
+   - **Follow-up**: **How would you use `zip()` to transpose a matrix (list of lists)?**
+     - **Answer**: 
+       You can use `zip()` in combination with the unpacking operator (`*`) to transpose a matrix.
+       ```python
+       matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+       transposed = list(zip(*matrix))
+       print(transposed)
+       # Output: [(1, 4, 7), (2, 5, 8), (3, 6, 9)]
+       ```
+
+---
 
 ### 32. **How do Python's `range()` and `xrange()` (in Python 2) differ?**
-   - **Follow-up**: What are the implications of using `range()` in Python 3, and when should you use `itertools.count` instead?
+   - **Answer**:
+     - In **Python 2**, `range()` creates a list, while `xrange()` returns an iterator. This means that `xrange()` does not generate the entire list in memory at once, making it more memory-efficient for large ranges.
+     - In **Python 3**, `range()` behaves like `xrange()` from Python 2, returning an iterator instead of a list. As a result, there is no `xrange()` in Python 3.
+     
+   - **Follow-up**: **What are the implications of using `range()` in Python 3, and when should you use `itertools.count` instead?**
+     - **Answer**:
+       - In **Python 3**, `range()` is memory efficient because it generates numbers on demand (as an iterator). However, if you need an **infinite sequence** of numbers, `itertools.count()` is more appropriate, as `range()` can only produce a finite range.
+       ```python
+       import itertools
+       counter = itertools.count(start=10, step=2)
+       for _ in range(5):
+           print(next(counter))
+       # Output: 10, 12, 14, 16, 18
+       ```
+
+---
 
 ### 33. **How does Python's `hash()` function work, and what makes a type hashable?**
-   - **Follow-up**: Can you give an example of a non-hashable type and explain why it cannot be used in a `set` or as a `dict` key?
+   - **Answer**:
+     The `hash()` function in Python returns an integer hash value for an object. The object must be **immutable** and **consistent** for it to be hashable. This is because hashable objects are required to maintain a consistent hash value throughout their lifetime, which is essential for their use in hash-based collections like `set` and `dict`.
+     - **Hashable types**: Examples of hashable types are integers, strings, and tuples.
+     - **Non-hashable types**: Mutable types like lists and dictionaries are not hashable because their contents can change, which would alter their hash value.
+
+   - **Follow-up**: **Can you give an example of a non-hashable type and explain why it cannot be used in a `set` or as a `dict` key?**
+     - **Answer**:
+       Lists are non-hashable types in Python because they are mutable, and their hash value can change if the list's contents change.
+       ```python
+       my_list = [1, 2, 3]
+       try:
+           my_set = {my_list}  # This will raise a TypeError
+       except TypeError as e:
+           print(e)  # Output: unhashable type: 'list'
+       ```
+
+---
 
 ### 34. **What are the key differences between `__call__` and `__iter__` methods in Python?**
-   - **Follow-up**: How would you create a callable class that behaves like a function, and what would `__call__` do?
+   - **Answer**:
+     - **`__call__`**: This method allows an object to be **called like a function**. When an object with a `__call__` method is invoked, it behaves like a function and executes the code inside `__call__`.
+     - **`__iter__`**: This method is used to define an **iterator** object. It allows the object to be iterated over using a `for` loop.
+
+   - **Follow-up**: **How would you create a callable class that behaves like a function, and what would `__call__` do?**
+     - **Answer**:
+       You can define a `__call__` method in a class, which makes instances of that class callable like functions.
+       ```python
+       class CallableClass:
+           def __call__(self, x, y):
+               return x + y
+
+       obj = CallableClass()
+       print(obj(2, 3))  # Output: 5
+       ```
+
+---
 
 ### 35. **How do you create and use virtual environments in Python, and why are they important?**
-   - **Follow-up**: What are some common challenges when managing dependencies in Python, and how would you solve them (e.g., `pipenv`, `virtualenv`, `conda`)?
+   - **Answer**:
+     Virtual environments allow you to create isolated environments for different Python projects, ensuring that dependencies do not conflict with each other. This is important for managing dependencies and avoiding version conflicts between packages.
+     
+     You can create a virtual environment using:
+     ```bash
+     python -m venv myenv
+     ```
+     To activate the environment:
+     - On Windows:
+       ```bash
+       myenv\Scripts\activate
+       ```
+     - On Mac/Linux:
+       ```bash
+       source myenv/bin/activate
+       ```
+     
+     After activation, you can install packages using `pip` and they will be contained within the virtual environment.
+
+   - **Follow-up**: **What are some common challenges when managing dependencies in Python, and how would you solve them (e.g., `pipenv`, `virtualenv`, `conda`)?**
+     - **Answer**:
+       Some common challenges include:
+       - Dependency conflicts between packages.
+       - Managing different Python versions across projects.
+     
+     Solutions:
+     - **`virtualenv`**: Creates isolated environments for each project.
+     - **`pipenv`**: Manages dependencies and virtual environments together, automatically creating and managing a `Pipfile` and `Pipfile.lock`.
+     - **`conda`**: A package manager that can also manage Python environments and dependencies, especially for scientific packages.
+
+---
 
 ### 36. **What is a Python "frozen" class, and how can you prevent a class from being modified after it is created?**
-   - **Follow-up**: How would you prevent any new attributes from being added to an object after its creation?
+   - **Answer**:
+     A "frozen" class refers to a class that does not allow attribute assignment after object creation. You can use the `__setattr__` method to prevent new attributes from being set.
+     
+     Example:
+     ```python
+     class FrozenClass:
+         def __setattr__(self, name, value):
+             raise AttributeError("Cannot modify attributes of a frozen class")
+
+     obj = FrozenClass()
+     try:
+         obj.new_attr = 5  # This will raise an exception
+     except AttributeError as e:
+         print(e)
+     ```
+
+   - **Follow-up**: **How would you prevent any new attributes from being added to an object after its creation?**
+     - **Answer**:
+       You can prevent the addition of new attributes by overriding `__setattr__` to raise an exception or by using the `__slots__` mechanism to restrict the attributes.
+       ```python
+       class NoNewAttributes:
+           __slots__ = ['attr1', 'attr2']
+
+       obj = NoNewAttributes()
+       obj.attr1 = 10
+       try:
+           obj.attr3 = 20  # This will raise an AttributeError
+       except AttributeError as e:
+           print(e)
+       ```
+
+---
 
 ### 37. **What are some performance optimization techniques for Python, particularly when dealing with large datasets?**
-   - **Follow-up**: Can you explain the use of `cProfile`, `timeit`, and `line_profiler` for profiling and optimizing Python code?
+   - **Answer**:
+     - **Use built-in data structures**: Built-in types like `list`, `dict`, and `set` are optimized for performance.
+     - **Use generators**: Instead of processing entire datasets in memory, use generators to process data lazily.
+     - **Optimize algorithms**: Analyze the time and space complexity of algorithms.
+     - **Use `numpy` for numerical data**: If working with large numerical datasets, use `numpy` for efficient array operations.
+
+   - **Follow-up**: **Can you explain the use of `cProfile`, `timeit`, and `line_profiler` for profiling and optimizing Python code?**
+     - **Answer**:
+       - **`cProfile`**: A profiler that gives a detailed report of the time spent in each function during execution.
+       - **`timeit`**: A tool for measuring the execution time of small code snippets.
+       - **`line_profiler`**: A profiler that measures time spent on a per-line basis.
+
+
+
+     Example with `timeit`:
+     ```python
+     import timeit
+     print(timeit.timeit('sum(range(100))', number=1000))
+     ```
+
+---
 
 ### 38. **What is the difference between `defaultdict`, `Counter`, and `OrderedDict` from the `collections` module?**
-   - **Follow-up**: When would you use `defaultdict` vs. a regular dictionary with `setdefault()`?
+   - **Answer**:
+     - **`defaultdict`**: A dictionary that returns a default value when a key does not exist.
+     - **`Counter`**: A dictionary subclass for counting hashable objects.
+     - **`OrderedDict`**: A dictionary that maintains the insertion order of items.
+
+   - **Follow-up**: **When would you use `defaultdict` vs. a regular dictionary with `setdefault()`?**
+     - **Answer**:
+       - Use **`defaultdict`** if you frequently need a default value for missing keys, and the default value is consistent across keys.
+       - Use **`setdefault()`** when you want to specify the default only when needed and do not want to change the dictionary class.
+
+---
 
 ### 39. **What is the difference between `staticmethod` and `classmethod`, and how are they commonly used in Python?**
-   - **Follow-up**: How would you use `classmethod` to create alternative constructors for a class?
+   - **Answer**:
+     - **`staticmethod`**: Defines a method that does not depend on instance or class. It can be called on both the class and instances, but it doesn't take `self` or `cls` as arguments.
+     - **`classmethod`**: Defines a method that takes the class (`cls`) as the first argument. It can modify the class state and is often used for alternative constructors.
+
+   - **Follow-up**: **How would you use `classmethod` to create alternative constructors for a class?**
+     - **Answer**:
+       You can use a `classmethod` to create alternative constructors that instantiate the class in different ways.
+       ```python
+       class Person:
+           def __init__(self, name, age):
+               self.name = name
+               self.age = age
+
+           @classmethod
+           def from_birth_year(cls, name, birth_year):
+               age = 2024 - birth_year
+               return cls(name, age)
+
+       person = Person.from_birth_year("Alice", 1990)
+       print(person.name, person.age)  # Output: Alice 34
+       ```
+
+---
 
 ### 40. **Explain how Python's `lambda` functions work and when it is appropriate to use them.**
-   - **Follow-up**: Can you explain a situation where using a `lambda` might cause problems or reduce readability?
+   - **Answer**:
+     A `lambda` function is an anonymous function defined using the `lambda` keyword. It is used for simple functions that are passed as arguments to higher-order functions like `map()`, `filter()`, and `sorted()`.
+     ```python
+     add = lambda x, y: x + y
+     print(add(2, 3))  # Output: 5
+     ```
+
+   - **Follow-up**: **Can you explain a situation where using a `lambda` might cause problems or reduce readability?**
+     - **Answer**:
+       Using `lambda` for complex operations can reduce readability. In these cases, it's better to define a regular function. For example:
+       ```python
+       # Hard to read
+       sorted_data = sorted(data, key=lambda x: x[1] + x[2])
+       
+       # More readable
+       def custom_sort(x):
+           return x[1] + x[2]
+       sorted_data = sorted(data, key=custom_sort)
+       ```
+       
+---
 
 ### 41. **How do you implement multi-threading in Python? What are some common pitfalls with Python threads?**
-   - **Follow-up**: How would you use the `queue` module for thread-safe communication between threads?
+
+**Implementation of multi-threading in Python:**
+
+In Python, multi-threading can be implemented using the `threading` module. You can create and start a thread using the `Thread` class. Here's an example:
+
+```python
+import threading
+
+def print_numbers():
+    for i in range(5):
+        print(i)
+
+# Create a thread
+thread = threading.Thread(target=print_numbers)
+
+# Start the thread
+thread.start()
+
+# Wait for the thread to finish
+thread.join()
+```
+
+**Common pitfalls with Python threads:**
+
+1. **Global Interpreter Lock (GIL):**
+   Python’s GIL ensures that only one thread executes Python bytecode at a time, which can limit the performance improvement from multi-threading for CPU-bound tasks.
+
+2. **Race conditions:**
+   Multiple threads accessing shared data may cause inconsistent results unless proper synchronization (using `Lock`, `RLock`, etc.) is done.
+
+3. **Deadlock:**
+   Threads may end up in a deadlock situation if proper locking order is not maintained.
+
+4. **Thread synchronization:**
+   Threads must be synchronized to avoid conflicts, which can lead to issues like data corruption.
+
+---
+
+**Follow-up:** How would you use the `queue` module for thread-safe communication between threads?
+
+You can use the `queue.Queue` class to implement thread-safe communication between threads. This ensures that when one thread is writing to the queue, another thread can read from it safely.
+
+Here’s an example:
+
+```python
+import threading
+import queue
+
+def producer(q):
+    for i in range(5):
+        print(f'Producing {i}')
+        q.put(i)
+
+def consumer(q):
+    while True:
+        item = q.get()
+        if item is None:  # Sentinel value to stop the consumer
+            break
+        print(f'Consuming {item}')
+
+q = queue.Queue()
+
+# Create threads
+producer_thread = threading.Thread(target=producer, args=(q,))
+consumer_thread = threading.Thread(target=consumer, args=(q,))
+
+# Start threads
+producer_thread.start()
+consumer_thread.start()
+
+# Wait for threads to finish
+producer_thread.join()
+
+# Signal the consumer to stop
+q.put(None)  # Sentinel value
+consumer_thread.join()
+```
+
+---
 
 ### 42. **What are "duck typing" and "protocols" in Python? How do they differ from traditional static typing in other languages?**
-   - **Follow-up**: Can you provide an example of how duck typing works in Python?
+
+**Duck Typing:**
+Duck typing is a concept in Python where the type or class of an object is determined by its behavior (i.e., the methods and attributes it has), not by its actual type. The famous phrase "If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck" captures this idea.
+
+For example, you can use an object with a `fly()` method regardless of its class type as long as it has the `fly()` method:
+
+```python
+class Bird:
+    def fly(self):
+        print("Flying!")
+
+class Airplane:
+    def fly(self):
+        print("Flying!")
+
+def take_off(flyable):
+    flyable.fly()
+
+bird = Bird()
+plane = Airplane()
+
+take_off(bird)  # "Flying!"
+take_off(plane)  # "Flying!"
+```
+
+**Protocols:**
+Protocols are a feature introduced in Python 3.8 (via the `typing` module) that define a set of methods or attributes that a class must implement, but without requiring the class to inherit from a specific base class. It’s similar to an interface in other languages.
+
+Example of using `Protocol`:
+
+```python
+from typing import Protocol
+
+class Flyer(Protocol):
+    def fly(self) -> None:
+        ...
+
+class Bird:
+    def fly(self) -> None:
+        print("Flying")
+
+def make_flyer(flyer: Flyer) -> None:
+    flyer.fly()
+
+bird = Bird()
+make_flyer(bird)  # This works because Bird implements the fly method
+```
+
+**Difference from traditional static typing:**
+In statically typed languages like Java or C++, types are explicitly declared and enforced, meaning that the compiler checks whether an object can be used where a particular type is expected. Duck typing and protocols in Python are more flexible and allow for behavior-driven rather than strict type-checking.
+
+---
+
+**Follow-up:** Can you provide an example of how duck typing works in Python?
+
+Yes, here’s an example:
+
+```python
+class Dog:
+    def speak(self):
+        return "Woof!"
+
+class Cat:
+    def speak(self):
+        return "Meow!"
+
+def animal_sound(animal):
+    print(animal.speak())
+
+dog = Dog()
+cat = Cat()
+
+animal_sound(dog)  # "Woof!"
+animal_sound(cat)  # "Meow!"
+```
+
+Here, `animal_sound` does not care about the type of the object (whether it’s a `Dog` or `Cat`) as long as it has a `speak()` method, which is the essence of duck typing.
+
+---
 
 ### 43. **What is the role of the `__repr__` method in Python? How is it different from `__str__`?**
-   - **Follow-up**: Can you show an example of overriding both methods in a class?
+
+The `__repr__` method is meant to return a string that gives an unambiguous representation of an object, which ideally can be used to recreate the object. The `__str__` method is intended to return a human-readable string representation of the object.
+
+- `__repr__` is used by the built-in function `repr()` and in debugging.
+- `__str__` is used by the `print()` function and `str()`.
+
+**Example:**
+
+```python
+class MyClass:
+    def __repr__(self):
+        return "MyClass(value=42)"
+    
+    def __str__(self):
+        return "This is MyClass with value 42"
+
+obj = MyClass()
+print(repr(obj))  # Output: MyClass(value=42)
+print(str(obj))   # Output: This is MyClass with value 42
+```
+
+---
+
+**Follow-up:** Can you show an example of overriding both methods in a class?
+
+Sure!
+
+```python
+class MyClass:
+    def __repr__(self):
+        return f"MyClass(x={self.x})"
+    
+    def __str__(self):
+        return f"Object with value {self.x}"
+
+    def __init__(self, x):
+        self.x = x
+
+obj = MyClass(10)
+print(repr(obj))  # MyClass(x=10)
+print(str(obj))   # Object with value 10
+```
+
+---
 
 ### 44. **How does Python handle name mangling in private variables (i.e., variables starting with `__`)?**
-   - **Follow-up**: What are the implications of using double underscores in variable names and how would you access those variables from outside the class?
+
+Python uses **name mangling** to protect variables that start with double underscores (`__`) by internally changing their name to make them less likely to clash with names in subclasses. 
+
+For example, a variable `__var` in a class will be renamed to `_ClassName__var`.
+
+```python
+class MyClass:
+    def __init__(self):
+        self.__private = 42
+
+obj = MyClass()
+print(obj.__private)  # AttributeError
+```
+
+To access the variable, you would do:
+
+```python
+print(obj._MyClass__private)  # 42
+```
+
+---
+
+**Follow-up:** What are the implications of using double underscores in variable names and how would you access those variables from outside the class?
+
+Using double underscores is mostly a way to prevent accidental name clashes in subclasses. However, it is not a true form of access control (like in other languages). It’s mainly a hint to developers that these variables are meant to be private.
+
+To access such variables outside the class, you can use the name-mangled form (e.g., `_MyClass__private`), but it’s generally discouraged as it breaks encapsulation.
+
+---
 
 ### 45. **What is a `try-except-else-finally` block in Python, and how does it work?**
-   - **Follow-up**: Can you explain the flow of control when an exception occurs versus when it does not?
+
+A `try-except-else-finally` block is used for exception handling in Python.
+
+- **`try`**: The block where you write code that might throw an exception.
+- **`except`**: This block catches exceptions raised in the `try` block.
+- **`else`**: This block is executed if no exception occurs.
+- **`finally`**: This block is executed regardless of whether an exception was raised or not.
+
+**Flow of control:**
+- If an exception is raised in the `try` block, the code in `except` is executed.
+- If no exception is raised, the `else` block is executed.
+- The `finally` block is always executed, useful for cleanup.
+
+**Example:**
+
+```python
+try:
+    x = 10 / 2
+except ZeroDivisionError:
+    print("Cannot divide by zero")
+else:
+    print("Division successful")
+finally:
+    print("This always runs")
+```
+
+Output:
+```
+Division successful
+This always runs
+```
+
+---
+
+**Follow-up:** Can you explain the flow of control when an exception occurs versus when it does not?
+
+- **When no exception occurs**: The program executes the `try` block. If no exception is raised, it moves to the `else` block, and then executes the `finally` block.
+- **When an exception occurs**: The program skips the rest of the `try` block and executes the corresponding `except` block (if one exists), and then executes the `finally` block.
+
+---
 
 ### 46. **What is the difference between `iter()` and `next()` in Python?**
-   - **Follow-up**: How would you write a custom iterator using these functions?
+
+- **`iter()`**: This function is used to return an iterator
+
+ object from an iterable (e.g., list, tuple, string). It’s typically called automatically when a loop starts.
+
+- **`next()`**: This function is used to retrieve the next item from an iterator. If the iterator is exhausted, it raises a `StopIteration` exception.
+
+**Example:**
+
+```python
+my_list = [1, 2, 3]
+iterator = iter(my_list)
+
+print(next(iterator))  # 1
+print(next(iterator))  # 2
+print(next(iterator))  # 3
+print(next(iterator))  # Raises StopIteration
+```
+
+---
+
+**Follow-up:** How would you write a custom iterator using these functions?
+
+```python
+class Reverse:
+    def __init__(self, data):
+        self.data = data
+        self.index = len(data)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.index == 0:
+            raise StopIteration
+        self.index = self.index - 1
+        return self.data[self.index]
+
+rev = Reverse('giraffe')
+for char in rev:
+    print(char)
+```
+
+---
 
 ### 47. **What are the potential issues with circular imports in Python, and how can you avoid them?**
-   - **Follow-up**: How would you refactor your code to avoid circular dependencies between modules?
+
+Circular imports happen when two or more modules depend on each other, leading to an import loop. This can result in `ImportError` or `AttributeError` when one of the modules tries to access something from another module before it has been fully initialized.
+
+**How to avoid circular imports:**
+1. **Refactor your code**: Move shared functionality into a separate module that both original modules can import.
+2. **Lazy imports**: Import the module inside a function or method, so it only gets imported when needed.
+3. **Use import aliasing**: Avoid direct imports in favor of late binding.
+
+---
+
+**Follow-up:** How would you refactor your code to avoid circular dependencies between modules?
+
+By moving shared functionality into a third module or reordering imports, you can avoid circular dependencies. For example:
+
+**Before refactor (circular import):**
+```python
+# module_a.py
+from module_b import func_b
+
+# module_b.py
+from module_a import func_a
+```
+
+**After refactor (no circular import):**
+```python
+# module_c.py
+def common_func():
+    pass
+
+# module_a.py
+from module_c import common_func
+
+# module_b.py
+from module_c import common_func
+```
+
+---
 
 ### 48. **How does Python's `import` system work?**
-   - **Follow-up**: Can you explain the difference between `import module`, `from module import function`, and `import module as alias`?
+
+Python uses the `import` statement to load modules and their contents into the current namespace.
+
+- **`import module`**: Imports the entire module.
+- **`from module import function`**: Imports a specific function, class, or variable from the module.
+- **`import module as alias`**: Imports the module and assigns it an alias.
+
+**Example:**
+
+```python
+import math
+print(math.sqrt(16))  # Import the whole module
+
+from math import sqrt
+print(sqrt(16))  # Import specific function
+
+import math as m
+print(m.sqrt(16))  # Alias for the module
+```
+
+---
+
+**Follow-up:** Can you explain the difference between `import module`, `from module import function`, and `import module as alias`?
+
+1. **`import module`**: Imports the whole module. You access functions/variables using `module.function`.
+2. **`from module import function`**: Imports just one function or class from the module, and you can use it directly.
+3. **`import module as alias`**: Imports the module but gives it an alias for shorthand usage.
+
+---
 
 ### 49. **What is a context manager, and how do you create one using `with`?**
-   - **Follow-up**: What are some real-world use cases where you would use a context manager (e.g., file I/O, locking resources)?
+
+A **context manager** is a Python object that defines the runtime context to be established when entering and exiting a block of code. It handles setup and teardown operations, such as opening/closing files.
+
+You can create a context manager using the `with` statement.
+
+**Example:**
+
+```python
+class MyContextManager:
+    def __enter__(self):
+        print("Entering the context")
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Exiting the context")
+
+with MyContextManager():
+    print("Inside the context")
+```
+
+**Output:**
+```
+Entering the context
+Inside the context
+Exiting the context
+```
+
+---
+
+**Follow-up:** What are some real-world use cases where you would use a context manager (e.g., file I/O, locking resources)?
+
+- **File I/O**: Automatically handles file opening and closing.
+- **Locking resources**: In multi-threaded environments, a context manager can lock and release resources.
+- **Database transactions**: Ensures that database connections are properly committed or rolled back.
+
+Example of file handling with a context manager:
+
+```python
+with open('file.txt', 'w') as f:
+    f.write("Hello, world!")
+```
+
+---
 
 ### 50. **What are the advantages and disadvantages of using `asyncio` for concurrency over multi-threading or multi-processing?**
-   - **Follow-up**: When would you use `asyncio` over traditional thread-based concurrency?
+
+**Advantages of `asyncio`:**
+1. **Non-blocking**: `asyncio` allows for efficient, non-blocking I/O-bound tasks like network requests or file I/O without the need for multiple threads.
+2. **Lightweight**: It uses lightweight coroutines instead of threads, reducing memory overhead and context switching.
+3. **Scalability**: You can scale the application to handle thousands of concurrent I/O-bound tasks without creating a new thread for each one.
+
+**Disadvantages of `asyncio`:**
+1. **Not suitable for CPU-bound tasks**: Since it runs on a single thread and relies on an event loop, `asyncio` is not ideal for CPU-bound tasks. For those, you’d want to use `multiprocessing`.
+2. **Complexity**: The async/await syntax can add complexity to the code, and understanding async programming may require a shift in thinking.
+
+---
+
+**Follow-up:** When would you use `asyncio` over traditional thread-based concurrency?
+
+Use `asyncio` when you have I/O-bound tasks that require concurrency, like handling multiple network connections or making HTTP requests in parallel. It’s ideal when the tasks spend a lot of time waiting (like reading from or writing to disk).
+
+For CPU-bound tasks, traditional threading or multiprocessing would be better as `asyncio` won’t benefit from multi-core CPUs.
+
+
+Here are the answers to the questions and their follow-ups:
+
+---
 
 ### 51. **How would you design a Python program to handle REST API calls asynchronously?**
-   - **Follow-up**: Can you demonstrate how to use `aiohttp` or `httpx` for making asynchronous API requests?
+
+To handle REST API calls asynchronously in Python, you can use an asynchronous HTTP client like `aiohttp` or `httpx` within an event loop managed by `asyncio`. The basic idea is to use `async/await` to make non-blocking calls, allowing the program to handle other tasks while waiting for the response.
+
+Here’s how you might design such a program using `aiohttp`:
+
+```python
+import aiohttp
+import asyncio
+
+async def fetch_data(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
+
+async def main():
+    url = 'https://jsonplaceholder.typicode.com/posts'
+    data = await fetch_data(url)
+    print(data)
+
+# Run the event loop
+if __name__ == '__main__':
+    asyncio.run(main())
+```
+
+In this example, `fetch_data` performs an asynchronous GET request to the specified URL using `aiohttp`, and the event loop ensures the program continues running while waiting for the HTTP response.
+
+---
+
+**Follow-up:** Can you demonstrate how to use `aiohttp` or `httpx` for making asynchronous API requests?
+
+Certainly! Below is an example using `httpx`:
+
+```python
+import httpx
+import asyncio
+
+async def fetch_data(url):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        return response.json()
+
+async def main():
+    url = 'https://jsonplaceholder.typicode.com/posts'
+    data = await fetch_data(url)
+    print(data)
+
+# Run the event loop
+if __name__ == '__main__':
+    asyncio.run(main())
+```
+
+This example works similarly to the `aiohttp` version but uses `httpx`, which is also designed for asynchronous HTTP requests. The process is largely the same: we create an async client and use `await` to fetch the data asynchronously.
+
+---
 
 ### 52. **Explain the concept of "duck typing" in Python. How does it impact method resolution order (MRO)?**
-   - **Follow-up**: Can you describe how Python's method resolution order works in the context of inheritance?
+
+**Duck Typing** in Python refers to the idea that an object's suitability for a particular operation is determined by whether it has the appropriate methods and attributes rather than its actual class or type. In other words, "if it looks like a duck, swims like a duck, and quacks like a duck, then it is a duck."
+
+**Impact on Method Resolution Order (MRO):**
+Duck typing influences the MRO indirectly, as Python's inheritance system relies on the object's ability to respond to methods and attributes dynamically, rather than strictly adhering to a hierarchy. Python will look up the method or attribute in the current class and its ancestors until it finds a match.
+
+However, Python's MRO is still important in class hierarchies with inheritance, ensuring methods are resolved in the proper order according to the C3 linearization algorithm.
+
+---
+
+**Follow-up:** Can you describe how Python's method resolution order works in the context of inheritance?
+
+In Python, **MRO** determines the order in which methods are looked up in a class hierarchy. The MRO is primarily controlled by the **C3 linearization algorithm** for classes that use multiple inheritance.
+
+When a method is called, Python follows the MRO to determine where to search for the method. It looks in the current class first, then moves up through the parent classes in the order defined by the MRO.
+
+For example:
+
+```python
+class A:
+    def hello(self):
+        print("Hello from A")
+
+class B(A):
+    def hello(self):
+        print("Hello from B")
+
+class C(A):
+    def hello(self):
+        print("Hello from C")
+
+class D(B, C):
+    pass
+
+# D's MRO
+print(D.__mro__)
+
+# Using the method
+d = D()
+d.hello()  # Will call hello from B, since B comes before C in the MRO of D.
+```
+
+Output:
+```
+(<class '__main__.D'>, <class '__main__.B'>, <class '__main__.C'>, <class '__main__.A'>, <class 'object'>)
+Hello from B
+```
+
+In this case, `D`'s MRO ensures that `hello` from class `B` is used, even though `C` also defines a `hello` method.
+
+---
 
 ### 53. **What is the `__slots__` feature in Python, and how does it impact memory usage?**
-   - **Follow-up**: How would you use `__slots__` to optimize the memory usage of a class with many instances?
+
+The `__slots__` feature in Python is used to restrict the attributes that a class can have. Instead of storing instance attributes in a dynamic dictionary (which is the default in Python), `__slots__` defines a fixed set of attributes, reducing memory overhead by not needing the dictionary.
+
+**Memory impact:**
+- Reduces memory usage, especially in classes with many instances.
+- Speeds up attribute access since there is no dictionary lookup.
+  
+However, `__slots__` has some trade-offs. It prevents the dynamic addition of new attributes and doesn't support multiple inheritance as flexibly.
+
+**Example:**
+
+```python
+class MyClass:
+    __slots__ = ['name', 'age']  # Only these attributes are allowed
+
+obj = MyClass()
+obj.name = 'John'
+obj.age = 30
+```
+
+In this example, `name` and `age` are stored in a more memory-efficient structure, and no other attributes can be added to `obj`.
+
+---
+
+**Follow-up:** How would you use `__slots__` to optimize the memory usage of a class with many instances?
+
+By defining `__slots__`, you can avoid using the standard dictionary to store attributes, saving memory. Here’s how you would use `__slots__`:
+
+```python
+class Employee:
+    __slots__ = ['name', 'position', 'salary']
+
+emp1 = Employee()
+emp1.name = 'Alice'
+emp1.position = 'Developer'
+emp1.salary = 70000
+
+# emp1.__dict__ will not exist; memory is saved.
+```
+
+In this case, `Employee` instances won’t have the overhead of a `__dict__`, which would normally store instance attributes, thus reducing memory usage when many instances are created.
+
+---
 
 ### 54. **How would you implement memoization in Python without using `functools.lru_cache`?**
-   - **Follow-up**: How does memoization improve the performance of recursive functions like the Fibonacci sequence?
+
+Memoization is a technique where you store the results of expensive function calls and reuse them when the same inputs occur again. You can implement memoization manually using a dictionary to store results.
+
+**Example of memoization for a Fibonacci function:**
+
+```python
+def memoize(func):
+    cache = {}
+    def wrapper(*args):
+        if args in cache:
+            return cache[args]
+        result = func(*args)
+        cache[args] = result
+        return result
+    return wrapper
+
+@memoize
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n-1) + fib(n-2)
+
+print(fib(10))  # Calculates and stores the result
+```
+
+This decorator `memoize` caches results by using the function arguments as the key. If the function is called with the same arguments again, it returns the cached result.
+
+---
+
+**Follow-up:** How does memoization improve the performance of recursive functions like the Fibonacci sequence?
+
+Memoization drastically improves the performance of recursive functions by preventing redundant calculations. For example, without memoization, the Fibonacci function would repeatedly calculate the same Fibonacci numbers many times. With memoization, once a Fibonacci number is calculated, it's stored in a cache and reused, reducing the time complexity from exponential (`O(2^n)`) to linear (`O(n)`).
+
+---
 
 ### 55. **What is the difference between `classmethod` and `staticmethod`?**
-   - **Follow-up**: When would you use one over the other, and can you create an example of a class with both?
+
+- **`classmethod`**: A method that receives the class (`cls`) as its first argument instead of an instance. It can modify the class state but not the instance state.
+- **`staticmethod`**: A method that doesn't receive an implicit first argument (like `self` or `cls`). It behaves like a regular function but lives inside the class's namespace.
+
+**Example:**
+
+```python
+class MyClass:
+    class_variable = 'Class variable'
+
+    @classmethod
+    def class_method(cls):
+        print(f'Class method: {cls.class_variable}')
+    
+    @staticmethod
+    def static_method():
+        print('Static method')
+
+# Call classmethod and staticmethod
+MyClass.class_method()  # Output: Class method: Class variable
+MyClass.static_method()  # Output: Static method
+```
+
+---
+
+**Follow-up:** When would you use one over the other, and can you create an example of a class with both?
+
+- Use `@classmethod` when you need to modify or access class-level attributes or when the method needs to know about the class.
+- Use `@staticmethod` when the method doesn't need access to either the instance or the class but should logically belong to the class.
+
+Example:
+
+```python
+class MyClass:
+    @classmethod
+    def from_string(cls, string):
+        return cls(string)
+    
+    @staticmethod
+    def is_valid(string):
+        return isinstance(string, str)
+
+obj = MyClass.from_string('Hello')  # Using classmethod
+print(obj)  # MyClass('Hello')
+
+print(MyClass.is_valid('Test'))  # Using staticmethod
+```
+
+---
 
 ### 56. **What are Python's built-in sorting algorithms, and how does `sorted()` work under the hood?**
-   - **Follow-up**: Can you explain the `key` and `reverse` arguments in `sorted()` and their typical use cases?
+
+Python uses **Timsort** (a hybrid sorting algorithm derived from merge sort and insertion sort) as the built-in sorting algorithm for functions like `sorted()` and `list.sort()`. Timsort is highly optimized for real-world data and has a time complexity of
+
+ `O(n log n)`.
+
+**How `sorted()` works**:
+- `sorted()` returns a new sorted list, while `list.sort()` sorts the list in place.
+- It takes a `key` function and a `reverse` flag as arguments for custom sorting.
+
+---
+
+**Follow-up:** Can you explain the `key` and `reverse` arguments in `sorted()` and their typical use cases?
+
+- **`key`**: A function that is applied to each element before sorting, allowing for custom sorting logic.
+- **`reverse`**: If `True`, the list will be sorted in descending order.
+
+**Example**:
+
+```python
+# Sorting by length of strings
+words = ['banana', 'pie', 'apple', 'cherry']
+sorted_words = sorted(words, key=len)
+print(sorted_words)  # ['pie', 'apple', 'banana', 'cherry']
+
+# Sorting in reverse order
+numbers = [1, 5, 2, 4, 3]
+sorted_numbers = sorted(numbers, reverse=True)
+print(sorted_numbers)  # [5, 4, 3, 2, 1]
+```
+
+---
 
 ### 57. **How does Python handle multiple inheritance, and what is the C3 Linearization algorithm?**
-   - **Follow-up**: What problems can arise with multiple inheritance, and how would you solve them in Python?
+
+Python uses the **C3 Linearization** (or C3 superclass linearization) algorithm to determine the method resolution order (MRO) in multiple inheritance scenarios. The MRO ensures that the order in which classes are checked for methods is consistent and predictable.
+
+---
+
+**Follow-up:** What problems can arise with multiple inheritance, and how would you solve them in Python?
+
+Issues include the **diamond problem**, where a method can be inherited from multiple classes, leading to ambiguity.
+
+To solve this, Python uses the C3 linearization to provide a clear MRO.
+
+---
 
 ### 58. **What is the `requests` library, and how does it simplify working with HTTP in Python?**
-   - **Follow-up**: Can you explain the difference between `requests.get`, `requests.post`, and `requests.put` with examples?
+
+The `requests` library is a popular Python library for making HTTP requests. It simplifies the process of sending HTTP requests by abstracting away the complexities of lower-level networking protocols and offering a simple API for interacting with REST APIs.
+
+---
+
+**Follow-up:** Can you explain the difference between `requests.get`, `requests.post`, and `requests.put` with examples?
+
+- **`requests.get`**: Sends a GET request, usually used for retrieving data.
+- **`requests.post`**: Sends a POST request, typically used to submit data.
+- **`requests.put`**: Sends a PUT request, usually used for updating data.
+
+**Example**:
+
+```python
+import requests
+
+# GET request
+response = requests.get('https://jsonplaceholder.typicode.com/posts')
+print(response.json())
+
+# POST request
+response = requests.post('https://jsonplaceholder.typicode.com/posts', json={'title': 'foo', 'body': 'bar', 'userId': 1})
+print(response.json())
+
+# PUT request
+response = requests.put('https://jsonplaceholder.typicode.com/posts/1', json={'title': 'updated'})
+print(response.json())
+```
+
+---
 
 ### 59. **Explain Python's `zip()` function and provide an example where it is useful.**
-   - **Follow-up**: How would you use `zip()` to create a dictionary from two lists?
+
+The `zip()` function takes two or more iterables and returns an iterator of tuples, where each tuple contains elements from the iterables at the same position.
+
+**Example**:
+
+```python
+names = ['Alice', 'Bob', 'Charlie']
+ages = [24, 30, 18]
+
+zipped = zip(names, ages)
+print(list(zipped))  # [('Alice', 24), ('Bob', 30), ('Charlie', 18)]
+```
+
+---
+
+**Follow-up:** How would you use `zip()` to create a dictionary from two lists?
+
+```python
+keys = ['name', 'age', 'city']
+values = ['Alice', 24, 'Wonderland']
+
+dictionary = dict(zip(keys, values))
+print(dictionary)  # {'name': 'Alice', 'age': 24, 'city': 'Wonderland'}
+```
+
+---
 
 ### 60. **What are Python's built-in iterators and how do they relate to `iter()` and `next()`?**
-   - **Follow-up**: Can you implement your own iterator class using `__iter__` and `__next__`?
+
+Python has several built-in iterators, including lists, tuples, dictionaries, and sets, which are all iterable. The `iter()` function is used to obtain an iterator from an iterable, and the `next()` function retrieves the next item from an iterator.
+
+---
+
+**Follow-up:** Can you implement your own iterator class using `__iter__` and `__next__`?
+
+```python
+class CountDown:
+    def __init__(self, start):
+        self.start = start
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.start <= 0:
+            raise StopIteration
+        self.start -= 1
+        return self.start
+
+counter = CountDown(5)
+for num in counter:
+    print(num)
+```
+
+This custom iterator counts down from the given number, and raises `StopIteration` when the count reaches zero.
 
 ### 61. **How would you implement the Singleton pattern in Python using the `__new__` method?**
-   - **Follow-up**: What are the potential drawbacks of using this approach, and what are alternatives?
+
+The **Singleton pattern** ensures that a class has only one instance, and provides a global point of access to it. To implement the Singleton pattern using the `__new__` method, we can override `__new__` to ensure that only one instance of the class is created. The `__new__` method is responsible for creating new instances, and by checking if an instance already exists, we can ensure the Singleton behavior.
+
+**Example:**
+
+```python
+class Singleton:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+# Testing the Singleton
+a = Singleton()
+b = Singleton()
+
+print(a is b)  # Output: True (Both variables point to the same instance)
+```
+
+In this implementation, the first time `__new__` is called, a new instance is created. On subsequent calls, the same instance is returned.
+
+---
+
+**Follow-up:** What are the potential drawbacks of using this approach, and what are alternatives?
+
+- **Drawbacks:**
+  - **Thread safety**: This approach is not thread-safe. If multiple threads create instances simultaneously, multiple instances could be created.
+  - **Global state**: It introduces a global state which can make the system harder to test and debug.
+  - **Not flexible**: It's hard to modify the Singleton pattern if changes are needed later, as it is tightly coupled to the class.
+
+- **Alternatives**:
+  - **Using a decorator**: You can use a decorator to enforce Singleton behavior, which may simplify the implementation.
+  - **Thread-safe Singleton**: Using `threading.Lock` to synchronize access to the instance in a multi-threaded environment.
+  - **Module-level Singleton**: A more Pythonic approach is to create the singleton at the module level, as modules are loaded only once.
+
+---
 
 ### 62. **What is the `functools.reduce()` function, and when would you use it?**
-   - **Follow-up**: Can you demonstrate an example where `reduce()` is used to process a list of numbers?
+
+`reduce()` from the `functools` module is used to apply a binary function (a function that takes two arguments) cumulatively to the items of an iterable, reducing the iterable to a single value.
+
+**Use case**: `reduce()` is commonly used for operations such as summing values, multiplying, or finding the greatest common divisor.
+
+**Example:**
+
+```python
+from functools import reduce
+
+# Find the product of all numbers in a list
+numbers = [1, 2, 3, 4]
+result = reduce(lambda x, y: x * y, numbers)
+print(result)  # Output: 24 (1 * 2 * 3 * 4)
+```
+
+In this example, `reduce()` applies the lambda function cumulatively to the list, multiplying the numbers together.
+
+---
+
+**Follow-up:** Can you demonstrate an example where `reduce()` is used to process a list of numbers?
+
+```python
+from functools import reduce
+
+# Find the sum of squares of a list of numbers
+numbers = [1, 2, 3, 4]
+result = reduce(lambda x, y: x + y**2, numbers)
+print(result)  # Output: 30 (1^2 + 2^2 + 3^2 + 4^2)
+```
+
+Here, `reduce()` applies the lambda function to each number, squaring it and then summing all the squared values together.
+
+---
 
 ### 63. **How do you handle large CSV files in Python without running out of memory?**
-   - **Follow-up**: Can you demonstrate using the `csv` module or `pandas` for streaming large datasets?
+
+To handle large CSV files efficiently without running out of memory, you can process the file line-by-line instead of loading it all at once. This is especially useful for files that don't fit in memory. The `csv` module in Python can be used to iterate over rows.
+
+**Example using `csv` module**:
+
+```python
+import csv
+
+# Open CSV file and process it line-by-line
+with open('large_file.csv', mode='r') as file:
+    reader = csv.reader(file)
+    for row in reader:
+        # Process each row
+        print(row)
+```
+
+Alternatively, using **pandas** with chunksize allows you to process large files in smaller, manageable portions.
+
+```python
+import pandas as pd
+
+# Read the CSV in chunks
+chunk_size = 10000
+for chunk in pd.read_csv('large_file.csv', chunksize=chunk_size):
+    # Process each chunk
+    print(chunk)
+```
+
+Here, `pandas.read_csv()` reads the CSV file in chunks, which helps reduce memory consumption by processing a small part of the file at a time.
+
+---
+
+**Follow-up:** Can you demonstrate using the `csv` module or `pandas` for streaming large datasets?
+
+Example with `csv` module:
+
+```python
+import csv
+
+with open('large_file.csv', mode='r') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        # Stream the data row-by-row for processing
+        process_data(row)
+```
+
+Example with `pandas`:
+
+```python
+import pandas as pd
+
+for chunk in pd.read_csv('large_file.csv', chunksize=10000):
+    process_chunk(chunk)
+```
+
+In both examples, you stream the file instead of loading it all into memory, making it scalable for large files.
+
+---
 
 ### 64. **What is a "singleton" pattern, and how do you implement it in Python?**
-   - **Follow-up**: Can you describe scenarios where using a Singleton would be beneficial?
+
+A **singleton pattern** is a design pattern that ensures a class has only one instance throughout the application. The Singleton pattern is useful when you need to control access to shared resources, such as a database connection or a configuration file.
+
+To implement the Singleton pattern in Python, we can use the `__new__` method or a class variable to ensure only one instance exists.
+
+**Example with `__new__` method**:
+
+```python
+class Singleton:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+```
+
+This ensures that the `Singleton` class will always return the same instance.
+
+---
+
+**Follow-up:** Can you describe scenarios where using a Singleton would be beneficial?
+
+- **Database connection pooling**: If you need a single connection object for a database throughout your application.
+- **Logging**: If you have a shared logging system where multiple parts of the program should log to the same log file.
+- **Configuration management**: If your application needs a single configuration object that stores settings, environment variables, etc.
+
+The Singleton pattern ensures that only one instance of such shared resources exists, making it easy to manage and access throughout the application.
+
+---
 
 ### 65. **What are `__getattr__` and `__getattribute__` in Python, and how do they differ?**
-   - **Follow-up**: When would you override these methods, and can you provide an example of each?
+
+Both `__getattr__` and `__getattribute__` are special methods used to intercept attribute access in Python, but they differ in when they are called.
+
+- **`__getattribute__`** is called for every attribute access, whether the attribute exists or not. It intercepts all attribute access.
+- **`__getattr__`** is called only when an attribute is accessed that doesn't exist in the instance.
+
+**Example of `__getattribute__`**:
+
+```python
+class MyClass:
+    def __getattribute__(self, name):
+        print(f'Accessing {name}')
+        return object.__getattribute__(self, name)
+
+obj = MyClass()
+obj.some_attribute  # Will call __getattribute__
+```
+
+**Example of `__getattr__`**:
+
+```python
+class MyClass:
+    def __getattr__(self, name):
+        return f'{name} does not exist'
+
+obj = MyClass()
+print(obj.some_attribute)  # Will call __getattr__ because the attribute doesn't exist
+```
+
+---
+
+**Follow-up:** When would you override these methods, and can you provide an example of each?
+
+- **Override `__getattribute__`** when you need to intercept all attribute access for a class (e.g., logging, validation).
+- **Override `__getattr__`** when you need to handle missing attributes, for example, returning a default value or raising an error.
+
+**Example of overriding `__getattribute__`**:
+
+```python
+class MyClass:
+    def __getattribute__(self, name):
+        print(f'Accessing {name}')
+        return super().__getattribute__(name)
+
+obj = MyClass()
+obj.some_attribute  # Will trigger __getattribute__
+```
+
+**Example of overriding `__getattr__`**:
+
+```python
+class MyClass:
+    def __getattr__(self, name):
+        return f'{name} not found'
+
+obj = MyClass()
+print(obj.some_attribute)  # Output: some_attribute not found
+```
+
+---
 
 ### 66. **What is a Python `coroutine`? How does it differ from a regular function?**
-   - **Follow-up**: Can you write a simple Python coroutine and demonstrate how to run it asynchronously?
 
-### 67. **Explain the `yield` keyword in Python and the difference between `yield` and `return`.**
-   - **Follow-up**: Can you write a generator that produces Fibonacci numbers using `yield`?
+A **coroutine** is a special type of function that can pause execution (using `await`) and yield control back to the event loop, allowing other tasks to run concurrently. Coroutines are used for asynchronous programming in Python.
 
-### 68. **What is the `__del__` method in Python, and when is it called?**
-   - **Follow-up**: Can you explain the potential dangers of relying on `__del__` for resource cleanup?
+**Difference from regular function**:
+- Regular functions return a value and complete execution when called.
+- Coroutines, however, return an **awaitable** object (like a `Future` or a coroutine object), which can be awaited using the `await` keyword.
 
-### 69. **How would you design a Python application to handle high-frequency logging efficiently?**
-   - **Follow-up**: What are some best practices to ensure that logging does not impact the performance of a production system?
+**Example of a coroutine**:
 
-### 70. **What is the purpose of the `__get__`, `__set__`, and `__delete__` methods in Python?**
-   - **Follow-up**: Can you demonstrate how these methods are used to implement custom descriptors?
+```python
+import asyncio
+
+async def my_coroutine():
+    print("Start")
+    await asyncio.sleep(1)
+    print("End")
+
+# Running the coroutine
+asyncio.run(my
+
+_coroutine())
+```
+
+---
+
+**Follow-up:** Can you write a simple Python coroutine and demonstrate how to run it asynchronously?
+
+```python
+import asyncio
+
+# A simple coroutine that pauses and then prints
+async def my_coroutine():
+    print("Start")
+    await asyncio.sleep(1)
+    print("Done")
+
+# Running the coroutine asynchronously
+asyncio.run(my_coroutine())  # Will output "Start", then "Done" after 1 second
+```
 
 ### 71. **Explain Python's memory model and the difference between "shallow" and "deep" copying.**
    - **Follow-up**: Can you write an example to show the difference between `copy.copy()` and `copy.deepcopy()` when working with mutable nested objects?
