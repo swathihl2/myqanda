@@ -2446,96 +2446,976 @@ async def my_coroutine():
 # Running the coroutine asynchronously
 asyncio.run(my_coroutine())  # Will output "Start", then "Done" after 1 second
 ```
-
 ### 71. **Explain Python's memory model and the difference between "shallow" and "deep" copying.**
-   - **Follow-up**: Can you write an example to show the difference between `copy.copy()` and `copy.deepcopy()` when working with mutable nested objects?
+
+In Python, variables are references to objects stored in memory. The memory model is based on the concept of **references**, meaning when you assign one variable to another, they both point to the same object in memory. 
+
+- **Shallow Copy**: A shallow copy creates a new object, but does not recursively copy objects inside the original object. It only copies the references to nested objects.
+- **Deep Copy**: A deep copy creates a new object and recursively copies all objects inside the original object, including nested objects, creating independent copies.
+
+---
+
+**Follow-up:** Can you write an example to show the difference between `copy.copy()` and `copy.deepcopy()` when working with mutable nested objects?
+
+```python
+import copy
+
+# A nested mutable object
+original = {'a': 1, 'b': {'x': 10, 'y': 20}}
+
+# Shallow copy
+shallow = copy.copy(original)
+shallow['b']['x'] = 99  # Modify the nested dictionary
+
+# Deep copy
+deep = copy.deepcopy(original)
+deep['b']['x'] = 42  # Modify the nested dictionary
+
+print("Original:", original)
+print("Shallow Copy:", shallow)
+print("Deep Copy:", deep)
+```
+
+**Output**:
+```python
+Original: {'a': 1, 'b': {'x': 99, 'y': 20}}
+Shallow Copy: {'a': 1, 'b': {'x': 99, 'y': 20}}
+Deep Copy: {'a': 1, 'b': {'x': 42, 'y': 20}}
+```
+
+- **Shallow Copy**: Modifying the nested dictionary in `shallow` also modified the original `original` dictionary because the references were copied.
+- **Deep Copy**: Modifying `deep` did not affect the original, as a full recursive copy was made.
+
+---
 
 ### 72. **What is a `metaclass` in Python, and how is it different from a normal class?**
-   - **Follow-up**: How can you use metaclasses to enforce coding conventions or restrict class behavior?
+
+A **metaclass** is a class that defines how other classes are created. While normal classes define the behavior of instances, a metaclass defines the behavior of the class itself. In other words, a metaclass is the "class of a class." You can think of it as a blueprint for creating classes, just like classes are blueprints for creating instances.
+
+**Example**:
+
+```python
+# Define a metaclass
+class MyMeta(type):
+    def __new__(cls, name, bases, dct):
+        dct['created_by'] = 'MyMeta'
+        return super().__new__(cls, name, bases, dct)
+
+# Use metaclass in a class
+class MyClass(metaclass=MyMeta):
+    pass
+
+print(MyClass.created_by)  # Output: MyMeta
+```
+
+---
+
+**Follow-up:** How can you use metaclasses to enforce coding conventions or restrict class behavior?
+
+You can use metaclasses to enforce coding conventions by modifying the class definition. For example, you could ensure that all class attributes follow a certain naming convention, or that a class contains specific methods.
+
+```python
+class NoPrivateAttributesMeta(type):
+    def __new__(cls, name, bases, dct):
+        for attr in dct:
+            if attr.startswith('_'):
+                raise ValueError(f"Attribute '{attr}' cannot be private")
+        return super().__new__(cls, name, bases, dct)
+
+class MyClass(metaclass=NoPrivateAttributesMeta):
+    public_attr = 42
+
+# Uncommenting the next line will raise a ValueError
+# class MyBadClass(metaclass=NoPrivateAttributesMeta):
+#     _private_attr = 99
+```
+
+This metaclass enforces the rule that no private attributes (those starting with `_`) can exist in the class.
+
+---
 
 ### 73. **How does Python handle variable scope and name resolution?**
-   - **Follow-up**: Can you explain the LEGB rule (Local, Enclosing, Global, Built-in) with an example of how variable resolution works in nested functions?
+
+Python uses a scope hierarchy to resolve names, which follows the **LEGB** rule: 
+
+- **L**: Local scope — The innermost scope (the function or method where the variable is defined).
+- **E**: Enclosing scope — The scope of any enclosing functions (closures).
+- **G**: Global scope — The top-level scope, such as the module where the variable is defined.
+- **B**: Built-in scope — The scope of built-in functions and variables.
+
+Python searches for a variable in this order and stops once it finds a match.
+
+---
+
+**Follow-up:** Can you explain the LEGB rule (Local, Enclosing, Global, Built-in) with an example of how variable resolution works in nested functions?
+
+```python
+x = "global"
+
+def outer():
+    x = "enclosing"
+
+    def inner():
+        x = "local"
+        print(x)  # Will this print 'local', 'enclosing', or 'global'?
+
+    inner()
+
+outer()
+```
+
+**Output**:
+```python
+local
+```
+
+Here, `inner()` resolves `x` to the **local** scope, so it prints `"local"`. If it didn't find `x` locally, it would search in the enclosing scope, global, and finally built-in scope.
+
+---
 
 ### 74. **What is the purpose of the `contextlib` module in Python, and how does it relate to context managers?**
-   - **Follow-up**: How would you implement a context manager using `contextlib`?
+
+The `contextlib` module provides utilities for working with context managers, which are objects that define a setup and teardown for a block of code, typically used with the `with` statement. Context managers are useful for managing resources such as file handles, database connections, and locks.
+
+**`contextlib`** provides tools like `contextlib.contextmanager` to easily define custom context managers using generators.
+
+---
+
+**Follow-up:** How would you implement a context manager using `contextlib`?
+
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def my_context_manager():
+    print("Entering the context")
+    yield
+    print("Exiting the context")
+
+# Using the context manager
+with my_context_manager():
+    print("Inside the context")
+```
+
+**Output**:
+```python
+Entering the context
+Inside the context
+Exiting the context
+```
+
+This implementation simplifies the creation of context managers, eliminating the need to define `__enter__` and `__exit__` methods explicitly.
+
+---
 
 ### 75. **Explain the differences between `int`, `float`, and `Decimal` in Python. When should you use `Decimal` over `float`?**
-   - **Follow-up**: Can you demonstrate a case where `float` would cause precision issues that `Decimal` solves?
+
+- **`int`**: Integer type, which represents whole numbers without decimals.
+- **`float`**: Floating-point numbers, which represent real numbers (numbers with decimals) but have limited precision.
+- **`Decimal`**: A type from the `decimal` module that represents decimal numbers with arbitrary precision. It avoids the precision issues inherent in `float`.
+
+You should use `Decimal` when precise decimal arithmetic is important (e.g., in financial calculations), as `float` can cause rounding errors due to its binary representation.
+
+---
+
+**Follow-up:** Can you demonstrate a case where `float` would cause precision issues that `Decimal` solves?
+
+```python
+from decimal import Decimal
+
+# Using float
+float_sum = 0.1 + 0.2
+print(float_sum)  # Output: 0.30000000000000004
+
+# Using Decimal
+decimal_sum = Decimal('0.1') + Decimal('0.2')
+print(decimal_sum)  # Output: 0.3
+```
+
+Here, `float` causes precision issues, but `Decimal` provides the correct result.
+
+---
 
 ### 76. **What are the benefits and trade-offs of using Python's built-in `asyncio` over traditional threading or multiprocessing?**
-   - **Follow-up**: How does `asyncio` handle blocking I/O, and what strategies can you use to prevent blocking in asynchronous code?
+
+**Benefits of `asyncio`:**
+- **Single-threaded concurrency**: Unlike threading, `asyncio` uses a single thread, which avoids issues like race conditions and thread management overhead.
+- **Efficient for I/O-bound tasks**: It is well-suited for handling multiple I/O-bound operations concurrently (e.g., network requests, file I/O).
+
+**Trade-offs**:
+- **Not suitable for CPU-bound tasks**: Since `asyncio` runs in a single thread, CPU-bound tasks (e.g., heavy computation) won't benefit from concurrency.
+- **Complexity**: Writing asynchronous code can be more complex than using synchronous code, especially when dealing with nested `async`/`await` calls.
+
+---
+
+**Follow-up:** How does `asyncio` handle blocking I/O, and what strategies can you use to prevent blocking in asynchronous code?
+
+`asyncio` handles blocking I/O by using non-blocking calls and allowing the event loop to manage tasks. To prevent blocking, you can:
+
+- **Use `async` I/O operations**: Ensure that I/O operations like `await asyncio.sleep()` or `await aiohttp.get()` are used to yield control back to the event loop.
+- **Offload CPU-bound work**: For CPU-bound tasks, use `asyncio.to_thread()` to run blocking functions in a separate thread.
+
+Example:
+
+```python
+import asyncio
+
+async def async_task():
+    await asyncio.sleep(1)  # Non-blocking I/O operation
+
+async def cpu_bound_task():
+    # Use to_thread to offload CPU-bound task
+    result = await asyncio.to_thread(compute)
+    print(result)
+
+async def main():
+    await asyncio.gather(async_task(), cpu_bound_task())
+
+asyncio.run(main())
+```
+
+---
 
 ### 77. **What is the purpose of the `super()` function in Python, and when should you use it?**
-   - **Follow-up**: Can you show an example of how `super()` works in the context of multiple inheritance?
+
+The `super()` function allows you to call methods from a parent class in a subclass, typically used in the context of method overriding. It helps ensure
+
+ that the parent class methods are called properly, especially when dealing with multiple inheritance.
+
+---
+
+**Follow-up:** Can you show an example of how `super()` works in the context of multiple inheritance?
+
+```python
+class A:
+    def method(self):
+        print("A's method")
+
+class B:
+    def method(self):
+        print("B's method")
+
+class C(A, B):
+    def method(self):
+        super().method()  # Calls the method from the first class in the MRO (A)
+        print("C's method")
+
+c = C()
+c.method()
+```
+
+**Output**:
+```python
+A's method
+C's method
+```
+
+In this case, `super()` calls `A`'s method, respecting the **method resolution order (MRO)** in multiple inheritance.
+
+---
 
 ### 78. **What are the different ways to manage dependencies in Python projects, and how do tools like `pip`, `conda`, and `poetry` differ?**
-   - **Follow-up**: How would you handle version conflicts between packages?
+
+- **`pip`**: The standard package manager for Python. It installs packages from the Python Package Index (PyPI) using a `requirements.txt` file.
+- **`conda`**: A cross-platform package manager that supports Python packages as well as non-Python dependencies. It's especially useful for data science environments.
+- **`poetry`**: A modern tool for managing Python projects and their dependencies, including versioning, and it automatically generates `pyproject.toml`.
+
+---
+
+**Follow-up:** How would you handle version conflicts between packages?
+
+Use a virtual environment (via `venv` or `conda`) to isolate dependencies. Tools like `pipenv`, `poetry`, or `conda` can help lock package versions, ensuring compatibility between dependencies.
+
+Example with `pipenv`:
+
+```bash
+pipenv install <package>  # Adds package to Pipfile
+pipenv lock  # Lock the dependencies in Pipfile.lock
+```
+
+---
 
 ### 79. **What is the difference between a `deepcopy` and a `shallow copy`? How do they behave with mutable objects and nested structures?**
-   - **Follow-up**: Can you explain how `deepcopy` handles objects with circular references?
+
+This question was already covered in the previous responses, with examples showing the difference between shallow and deep copies.
+
+---
+
+**Follow-up:** Can you explain how `deepcopy` handles objects with circular references?
+
+```python
+import copy
+
+# Circular reference example
+obj = {}
+obj['self'] = obj
+
+# Deepcopy the object
+copied_obj = copy.deepcopy(obj)
+
+print(copied_obj)
+```
+
+Here, `deepcopy` handles circular references correctly by ensuring that the copied object contains references to itself, rather than leading to infinite recursion.
+
+---
 
 ### 80. **What are Python's built-in data structures (e.g., `list`, `tuple`, `dict`, `set`), and what are their time complexities for common operations?**
-   - **Follow-up**: How would you choose the appropriate data structure for a specific task, such as finding unique elements in a list or counting occurrences?
+
+**Data Structures**:
+- **`list`**: Ordered, mutable sequence of elements. Common operations like `append()` and indexing are O(1), while searching for an element is O(n).
+- **`tuple`**: Ordered, immutable sequence. Similar to `list`, but more memory-efficient.
+- **`dict`**: Unordered collection of key-value pairs. Lookup, insertion, and deletion are O(1).
+- **`set`**: Unordered collection of unique elements. Set operations like checking membership and insertion are O(1).
+
+---
+
+**Follow-up:** How would you choose the appropriate data structure for a specific task, such as finding unique elements in a list or counting occurrences?
+
+- **Finding unique elements**: Use a **set** because it automatically enforces uniqueness and supports O(1) lookup.
+- **Counting occurrences**: Use a **`dict`** or **`collections.Counter`**, as they provide efficient counting.
+
+```python
+from collections import Counter
+# Counting occurrences in a list
+counter = Counter([1, 2, 2, 3, 3, 3])
+print(counter)  # Output: Counter({3: 3, 2: 2, 1: 1})
+```
 
 ### 81. **How do Python's `__enter__` and `__exit__` methods work in context managers, and what is their significance in resource management?**
-   - **Follow-up**: Can you demonstrate how to implement a context manager that safely handles opening and closing a file or database connection?
+
+In Python, the `__enter__` and `__exit__` methods are key components of a context manager, which is an object that defines a runtime context for executing code. The primary purpose of context managers is to manage resources (like file handles, database connections, etc.) and ensure they are properly cleaned up when the code block exits.
+
+- **`__enter__`**: This method is executed when the `with` block is entered. It can return a value, which is then assigned to the variable after the `as` keyword in the `with` statement.
+- **`__exit__`**: This method is executed when the `with` block is exited, regardless of whether an exception occurred or not. It is responsible for cleaning up resources, such as closing files or releasing network connections.
+
+These methods help automate resource management, ensuring that resources are always properly cleaned up, even if exceptions are raised.
+
+---
+
+**Follow-up:** Can you demonstrate how to implement a context manager that safely handles opening and closing a file or database connection?
+
+```python
+class FileContextManager:
+    def __init__(self, filename, mode):
+        self.filename = filename
+        self.mode = mode
+        self.file = None
+
+    def __enter__(self):
+        # Open the file and return it
+        self.file = open(self.filename, self.mode)
+        return self.file
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # Ensure the file is closed, even if an exception occurred
+        if self.file:
+            self.file.close()
+        # If an exception occurred, we can suppress it by returning True
+        return False  # Do not suppress the exception
+
+# Using the context manager
+with FileContextManager('example.txt', 'w') as file:
+    file.write("Hello, World!")
+    # File is automatically closed when exiting the context block
+```
+
+In this example, the file is automatically opened and closed, and if an exception occurs within the `with` block, the file is still closed properly.
+
+---
 
 ### 82. **How does Python handle exceptions and exception propagation, and how can you create custom exceptions?**
-   - **Follow-up**: How would you implement a custom exception that captures additional context (e.g., error code, URL)?
+
+Python handles exceptions using a mechanism called **exception propagation**. When an exception occurs, Python looks for an appropriate **except** block in the current function or block of code to handle the exception. If it doesn't find one, the exception propagates up the call stack to the calling function, and this process continues until either an exception handler is found or the program terminates.
+
+To create custom exceptions, you can subclass Python's built-in `Exception` class.
+
+---
+
+**Follow-up:** How would you implement a custom exception that captures additional context (e.g., error code, URL)?
+
+```python
+class CustomAPIException(Exception):
+    def __init__(self, message, error_code, url):
+        super().__init__(message)
+        self.error_code = error_code
+        self.url = url
+
+    def __str__(self):
+        return f"Error {self.error_code}: {self.args[0]} (URL: {self.url})"
+
+# Raising the custom exception
+try:
+    raise CustomAPIException("Failed to fetch data", 404, "https://api.example.com")
+except CustomAPIException as e:
+    print(e)
+```
+
+**Output**:
+```
+Error 404: Failed to fetch data (URL: https://api.example.com)
+```
+
+In this example, the custom exception includes additional context like the error code and the URL, providing more useful information when the exception is raised.
+
+---
 
 ### 83. **What is the `property()` function, and how does it allow you to manage attribute access in Python classes?**
-   - **Follow-up**: Can you create a class that uses the `property` decorator to manage the access to its attributes?
+
+The `property()` function is used to define getter, setter, and deleter methods for an attribute in a Python class. It allows you to manage attribute access and modification with custom logic, while still using the attribute like a regular class attribute.
+
+- **Getter**: Defines the logic for retrieving the value of an attribute.
+- **Setter**: Defines the logic for setting the value of an attribute.
+- **Deleter**: Defines the logic for deleting an attribute.
+
+---
+
+**Follow-up:** Can you create a class that uses the `property` decorator to manage the access to its attributes?
+
+```python
+class Circle:
+    def __init__(self, radius):
+        self._radius = radius
+
+    @property
+    def radius(self):
+        return self._radius
+
+    @radius.setter
+    def radius(self, value):
+        if value < 0:
+            raise ValueError("Radius cannot be negative")
+        self._radius = value
+
+    @property
+    def area(self):
+        return 3.14159 * (self._radius ** 2)
+
+# Usage
+c = Circle(5)
+print(c.area)  # Calls the getter for area
+c.radius = 10  # Calls the setter for radius
+print(c.area)
+```
+
+In this example, the `radius` attribute is managed through the `property` decorator, ensuring that negative values are not assigned. The `area` is computed dynamically when accessed.
+
+---
 
 ### 84. **What are Python’s `hashable` and `immutable` types?**
-   - **Follow-up**: How does Python use the hash value of objects, and how do `dict` and `set` rely on hash values for storing elements?
+
+- **`hashable`**: An object is hashable if it has a valid `__hash__()` method and can be used as a key in a `dict` or as an element in a `set`. Hashable objects must be immutable because their hash value should not change during their lifetime.
+- **`immutable`**: An object is immutable if its state cannot be changed after it is created. Immutable types in Python include `int`, `float`, `str`, `tuple`, and `frozenset`.
+
+---
+
+**Follow-up:** How does Python use the hash value of objects, and how do `dict` and `set` rely on hash values for storing elements?
+
+Python uses hash values to determine where to store objects in a hash table. When you use an object as a dictionary key or a set element, Python computes its hash value and uses it to quickly find the object in the underlying hash table.
+
+- **`dict`**: Keys in a dictionary must be hashable because Python uses the hash value to quickly look up values associated with the key.
+- **`set`**: Elements in a set must be hashable because Python uses the hash value to check for membership and manage uniqueness.
+
+Example with a dictionary:
+
+```python
+d = {}
+d['key'] = 42  # 'key' must be hashable
+```
+
+---
 
 ### 85. **Explain the difference between `iterable`, `iterator`, and `generator` in Python.**
-   - **Follow-up**: Can you create a generator that yields an infinite series of numbers, and how would you handle this in an efficient way?
+
+- **Iterable**: An object that can be iterated over (e.g., `list`, `tuple`, `dict`). It implements the `__iter__()` method, which returns an iterator.
+- **Iterator**: An object that represents a stream of data, obtained from an iterable. It implements the `__iter__()` and `__next__()` methods.
+- **Generator**: A special type of iterator that is defined using a function with `yield`. Generators produce items lazily (one at a time) and are more memory-efficient than regular iterators.
+
+---
+
+**Follow-up:** Can you create a generator that yields an infinite series of numbers, and how would you handle this in an efficient way?
+
+```python
+def infinite_numbers(start=0):
+    while True:
+        yield start
+        start += 1
+
+# Usage
+gen = infinite_numbers()
+for i in range(5):  # Just to show the first 5 numbers
+    print(next(gen))
+```
+
+In this case, the generator yields numbers lazily, and you can handle this efficiently because it doesn't generate all numbers upfront. The generator keeps the state between iterations.
+
+---
 
 ### 86. **What are the different ways to iterate over a Python dictionary?**
-   - **Follow-up**: How would you iterate over both keys and values in a dictionary and modify the values during iteration?
+
+There are several ways to iterate over a Python dictionary:
+
+- **Iterating over keys**: Use `dict.keys()`
+- **Iterating over values**: Use `dict.values()`
+- **Iterating over key-value pairs**: Use `dict.items()`
+
+Example:
+
+```python
+d = {'a': 1, 'b': 2, 'c': 3}
+
+# Iterating over keys
+for key in d:
+    print(key)
+
+# Iterating over values
+for value in d.values():
+    print(value)
+
+# Iterating over key-value pairs
+for key, value in d.items():
+    print(key, value)
+```
+
+---
+
+**Follow-up:** How would you iterate over both keys and values in a dictionary and modify the values during iteration?
+
+```python
+d = {'a': 1, 'b': 2, 'c': 3}
+
+# Modifying values during iteration
+for key, value in d.items():
+    d[key] = value * 2
+
+print(d)  # Output: {'a': 2, 'b': 4, 'c': 6}
+```
+
+In this example, the values are modified during the iteration by multiplying them by 2.
+
+---
 
 ### 87. **What is the difference between `str.format()` and f-strings in Python 3.6+?**
-   - **Follow-up**: In what scenarios would you prefer one over the other, and how do performance and readability compare?
 
-### 88. **What is the purpose of the `itertools` module, and how do functions like `combinations`, `permutations`, and `product` differ?**
-   - **Follow-up**: How would you use `itertools` to generate all possible subsets of a list?
+- **`str.format()`**: Introduced in Python 2.7/3.0, it provides a way to embed expressions inside string literals. It uses `{}` placeholders, and values are passed to the `format()` method.
+- **f-strings**: Introduced in Python 3.6, they allow for inline expression evaluation within string literals, using `{}` and prefixing the string with an `f`.
 
-### 89. **How does Python handle object identity and equality?**
-   - **Follow-up**: What is the difference between `==` and `is` operators in Python, and when should each be used?
+**Example:**
 
-### 90. **What are the key differences between `threading`, `multiprocessing`, and `concurrent.futures` in Python?**
-   - **Follow-up**: How would you decide which one to use when building a concurrent or parallel system in Python?
+```python
+
+
+name = "Alice"
+age = 30
+
+# Using str.format()
+greeting1 = "Hello, {}. You are {} years old.".format(name, age)
+
+# Using f-strings
+greeting2 = f"Hello, {name}. You are {age} years old."
+
+print(greeting1)  # Output: Hello, Alice. You are 30 years old.
+print(greeting2)  # Output: Hello, Alice. You are 30 years old.
+```
+
+**Performance**: F-strings are faster and more concise than `str.format()`.
+
+---
+
+**Follow-up:** In what scenarios would you prefer one over the other, and how do performance and readability compare?
+
+- **Performance**: F-strings are faster because the expression is evaluated at runtime directly in the string literal.
+- **Readability**: F-strings are often more readable, especially when including complex expressions inside strings.
+
+In general, prefer **f-strings** when working in Python 3.6+ for better readability and performance.
+
 
 ### 91. **What is the `functools.lru_cache` decorator, and how does it work?**
-   - **Follow-up**: Can you implement a custom caching solution using `functools` and explain when `lru_cache` is particularly useful?
+
+The `functools.lru_cache` decorator provides a simple way to cache the results of a function based on its arguments. It stands for **Least Recently Used (LRU)** cache, which means that the cache will store a limited number of results, and once the cache is full, it will discard the least recently used items. This is particularly useful for optimizing functions that are expensive to compute, such as recursive functions, by avoiding repeated calculations for the same inputs.
+
+**How it works:**
+- `lru_cache` stores the results of a function in memory using a dictionary. When a function is called with a set of arguments, the decorator checks if the result is already in the cache. If it is, it returns the cached result; otherwise, it computes the result, stores it in the cache, and then returns it.
+
+You can specify the maximum number of items to keep in the cache using the `maxsize` argument (the default is 128). If the cache exceeds this size, the least recently used items are removed.
+
+---
+
+**Follow-up:** Can you implement a custom caching solution using `functools` and explain when `lru_cache` is particularly useful?
+
+```python
+import functools
+
+# Custom caching function using functools
+def cache(func):
+    cache_data = {}
+
+    @functools.wraps(func)
+    def wrapper(*args):
+        if args not in cache_data:
+            cache_data[args] = func(*args)
+        return cache_data[args]
+    
+    return wrapper
+
+@cache
+def expensive_computation(x, y):
+    print("Computing...")
+    return x * y
+
+# Usage
+print(expensive_computation(3, 4))  # Computes and caches
+print(expensive_computation(3, 4))  # Returns from cache
+```
+
+In the example above, a custom cache is implemented, storing results in a dictionary. The first time the function is called, it computes the result and stores it. On subsequent calls with the same arguments, it fetches the result from the cache.
+
+**When `lru_cache` is useful**: It is particularly helpful when dealing with functions that are called multiple times with the same parameters, especially in recursive algorithms like computing Fibonacci numbers or factorials. It avoids redundant computations and speeds up execution by returning cached results.
+
+---
 
 ### 92. **What are `async` and `await`, and how do they work in Python’s asynchronous programming model?**
-   - **Follow-up**: Can you explain how `asyncio` manages cooperative multitasking and provide an example of using `async` and `await` with a network I/O operation?
+
+- **`async`**: This keyword is used to define an asynchronous function (or coroutine). When you define a function with `async`, it returns a coroutine object instead of a regular function result.
+- **`await`**: This keyword is used to pause the execution of a coroutine and wait for another coroutine to finish executing. It allows Python to handle other tasks while waiting for the coroutine to complete.
+
+Together, `async` and `await` allow for **asynchronous programming**, enabling Python to perform non-blocking I/O operations and manage concurrent tasks more efficiently than using threads.
+
+---
+
+**Follow-up:** Can you explain how `asyncio` manages cooperative multitasking and provide an example of using `async` and `await` with a network I/O operation?
+
+`asyncio` is Python's built-in library for asynchronous programming. It handles cooperative multitasking by running coroutines that voluntarily yield control, allowing other tasks to run while waiting for I/O operations (like network requests) to complete. This helps to avoid blocking the main thread and allows handling many tasks concurrently.
+
+Example of using `asyncio` with `async` and `await` for network I/O (e.g., making HTTP requests asynchronously):
+
+```python
+import asyncio
+import aiohttp
+
+async def fetch_data(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.text()
+
+async def main():
+    url = "https://example.com"
+    data = await fetch_data(url)
+    print(data)
+
+# Running the async function
+asyncio.run(main())
+```
+
+In this example:
+- `fetch_data` is an asynchronous function that makes an HTTP GET request.
+- `asyncio.run(main())` starts the asyncio event loop, runs the `main` coroutine, and manages the I/O tasks.
+
+---
 
 ### 93. **How do Python's `with` statements work, and what role does the `contextlib` module play?**
-   - **Follow-up**: Can you write a simple custom context manager to handle opening and closing a resource?
+
+The `with` statement simplifies resource management, such as handling files or network connections. It guarantees that a resource is properly acquired and released, even if an error occurs.
+
+- **Context managers** are objects that define `__enter__` and `__exit__` methods. When a `with` block is entered, the `__enter__` method is called to acquire the resource, and the `__exit__` method is called when the block is exited to release it.
+
+The `contextlib` module provides utilities to create context managers more easily, including the `contextmanager` decorator to convert a generator function into a context manager.
+
+---
+
+**Follow-up:** Can you write a simple custom context manager to handle opening and closing a resource?
+
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def open_resource(resource_name):
+    try:
+        # Acquire the resource
+        resource = open(resource_name, 'r')
+        yield resource  # Provide the resource to the block
+    finally:
+        # Cleanup the resource (close the file)
+        resource.close()
+
+# Usage
+with open_resource('example.txt') as file:
+    content = file.read()
+    print(content)
+```
+
+In this example:
+- `open_resource` is a context manager created using the `@contextmanager` decorator.
+- It handles the opening and closing of the resource (`file`) automatically, ensuring that the file is closed even if an error occurs in the `with` block.
+
+---
 
 ### 94. **What are the different ways to manage mutable and immutable objects in Python?**
-   - **Follow-up**: How does Python handle object mutability when passed as arguments to functions, and how does this affect performance?
+
+- **Immutable objects**: These objects cannot be modified after they are created. Examples include `int`, `float`, `str`, `tuple`, and `frozenset`. When you "modify" an immutable object, a new object is created.
+- **Mutable objects**: These objects can be changed after they are created. Examples include `list`, `dict`, `set`, and user-defined objects.
+
+To manage mutable and immutable objects:
+- **Mutable objects** should be carefully handled when passed to functions, as modifications affect the original object.
+- **Immutable objects** offer safety in situations where shared state is not desired, as they cannot be changed by mistake.
+
+---
+
+**Follow-up:** How does Python handle object mutability when passed as arguments to functions, and how does this affect performance?
+
+When mutable objects are passed to functions, the function receives a reference to the object, not a copy, meaning changes to the object inside the function affect the original object. This can lead to unintended side effects if not handled carefully.
+
+Immutable objects are passed by value (their value can't be modified), so functions can't accidentally modify them. This leads to fewer side effects and is typically safer in concurrent programming.
+
+**Performance**: Passing immutable objects is generally more efficient since they are small and not copied. However, large mutable objects may cause performance bottlenecks if many copies of them are created.
+
+---
 
 ### 95. **How would you implement a thread-safe singleton pattern in Python?**
-   - **Follow-up**: What problems might arise when using the Singleton pattern, and how can Python’s `threading` module help solve them?
+
+To implement a thread-safe singleton pattern, you can use a lock to ensure that only one thread can create the instance at a time.
+
+```python
+import threading
+
+class Singleton:
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super(Singleton, cls).__new__(cls)
+        return cls._instance
+
+# Usage
+singleton1 = Singleton()
+singleton2 = Singleton()
+
+print(singleton1 is singleton2)  # True
+```
+
+In this example, the `__new__` method ensures that only one instance of the `Singleton` class is created, even in a multi-threaded environment.
+
+---
+
+**Follow-up:** What problems might arise when using the Singleton pattern, and how can Python’s `threading` module help solve them?
+
+The main issue with the Singleton pattern is the possibility of multiple instances being created in a multi-threaded environment. This can be mitigated using locks, as shown in the example above, where the lock ensures that only one thread can instantiate the Singleton class at a time.
+
+Additionally, Singleton classes can sometimes introduce global state, which can be problematic for testing and maintaining code. To address this, you can use dependency injection or avoid global state altogether.
+
+---
 
 ### 96. **What is the `functools.partial` function, and how is it used in Python?**
-   - **Follow-up**: Can you demonstrate how `partial` works and how it can be used to simplify a function with multiple parameters?
 
-### 97. **What is the purpose of `__del__` in Python, and when is it triggered?**
-   - **Follow-up**: How would you implement proper resource cleanup in Python when using `__del__` for destructors?
+`functools.partial` is a higher-order function that allows you to create a new function by fixing some of the arguments of an existing function. This is useful when you want to simplify a function call by pre-filling some of the arguments.
+
+---
+
+**Follow-up:** Can you demonstrate how `partial` works and how it can be used to simplify a function with multiple parameters?
+
+```python
+from functools import partial
+
+def multiply(x, y):
+    return x * y
+
+# Create a partial function that multiplies by 2
+double = partial(multiply, 2)
+
+print(double(4))  # Output: 8
+```
+
+In this example, `partial` creates a new function `double` that always multiplies the given argument by 2. You can use `partial` to simplify functions that require multiple parameters by pre-defining some of them.
+
+---
+
+### 97. **What is the purpose of `__del__` in Python, and when
+
+ is it triggered?**
+
+The `__del__` method in Python is a destructor, called when an object is about to be destroyed (i.e., when there are no more references to it). It can be used to perform cleanup tasks, such as closing files or releasing network connections.
+
+However, the timing of `__del__` is not guaranteed, as it depends on the garbage collection process. It is generally safer to use context managers or explicitly close resources.
+
+---
+
+**Follow-up:** How would you implement proper resource cleanup in Python when using `__del__` for destructors?
+
+```python
+class Resource:
+    def __init__(self, name):
+        self.name = name
+
+    def __del__(self):
+        print(f"Cleaning up resource: {self.name}")
+
+# Usage
+resource = Resource("File")
+del resource  # Triggers the __del__ method
+```
+
+While `__del__` is called when an object is deleted, it is better to use context managers (`with` statement) for more predictable and safe cleanup. This avoids relying on the unpredictable behavior of the garbage collector.
+
+---
 
 ### 98. **How would you handle a memory leak in a Python application, and what tools can you use to track memory usage?**
-   - **Follow-up**: Can you demonstrate how to use `gc` (garbage collection) and memory profiling tools to identify and fix leaks?
+
+Memory leaks in Python are usually caused by references that prevent objects from being garbage collected, such as circular references or objects that are unintentionally held in memory. To handle memory leaks:
+
+- **Identify memory leaks**: Use tools like `gc` (Garbage Collector) to manually inspect and trigger garbage collection. You can also use memory profiling tools such as **`memory_profiler`**, **`objgraph`**, or **`tracemalloc`** to track memory usage and identify memory hotspots.
+  
+- **Fix leaks**: If you detect that objects are not being freed due to circular references or references being held by global variables or collections, break those references or explicitly delete unused objects.
+
+---
+
+**Tools to track memory usage**:
+- **`gc` module**: Python’s garbage collection module, which allows manual control over garbage collection, inspecting unreachable objects, and forcing collection cycles.
+- **`tracemalloc`**: A built-in Python module that tracks memory usage by different parts of your program. It can be used to detect memory leaks by identifying allocations that are not freed.
+- **`memory_profiler`**: A third-party module that helps to profile memory usage line by line within a Python script.
+- **`objgraph`**: A third-party module for visualizing object graphs and detecting reference cycles that can cause memory leaks.
+
+Example using `gc`:
+
+```python
+import gc
+
+# Enable garbage collection debugging
+gc.set_debug(gc.DEBUG_LEAK)
+
+# Simulate a potential memory leak
+class Leaky:
+    def __init__(self):
+        self.data = [1] * (10**6)
+
+obj = Leaky()
+
+# Manually collect garbage and check for leaks
+gc.collect()
+```
+
+---
+
+**Follow-up:** Can you demonstrate how to use `gc` (garbage collection) and memory profiling tools to identify and fix leaks?
+
+```python
+import gc
+import tracemalloc
+
+# Start tracking memory allocation
+tracemalloc.start()
+
+# Simulate a potential memory leak
+class Leaky:
+    def __init__(self):
+        self.data = [1] * (10**6)
+
+# Create an instance of the Leaky class
+obj = Leaky()
+
+# Trigger garbage collection
+gc.collect()
+
+# Print memory usage statistics
+current, peak = tracemalloc.get_traced_memory()
+print(f"Current memory usage: {current / 1024} KB")
+print(f"Peak memory usage: {peak / 1024} KB")
+
+# Stop tracking memory allocation
+tracemalloc.stop()
+```
+
+In this example, the `tracemalloc` module is used to track the memory usage during the execution of the program, and `gc.collect()` forces garbage collection to ensure unused objects are cleaned up.
+
+---
 
 ### 99. **What is the difference between `str.encode()` and `bytes.decode()` in Python?**
-   - **Follow-up**: How would you convert a Unicode string to a byte string and vice versa in Python 3?
+
+- **`str.encode()`**: This method is used to convert a string (`str`) into a byte sequence (`bytes`). The encoding specifies how to convert the string's characters to bytes (e.g., UTF-8, ASCII). This is typically used when writing data to files or network connections where byte sequences are required.
+
+- **`bytes.decode()`**: This method is used to convert a byte sequence (`bytes`) back into a string (`str`) using a specific decoding format. It is the reverse of `encode()`, transforming the raw bytes into a readable string based on the specified encoding.
+
+**Example of `encode()` and `decode()`**:
+
+```python
+# Encoding a string to bytes
+s = "Hello, World!"
+encoded = s.encode('utf-8')
+print(encoded)  # Output: b'Hello, World!'
+
+# Decoding bytes back to a string
+decoded = encoded.decode('utf-8')
+print(decoded)  # Output: Hello, World!
+```
+
+The encoding and decoding processes are necessary when dealing with external systems that require data to be transferred as bytes (such as network protocols) or when working with different encodings in text files.
+
+---
+
+**Follow-up:** How would you convert a Unicode string to a byte string and vice versa in Python 3?
+
+```python
+# Unicode string to byte string
+unicode_string = "Hello, Unicode!"
+byte_string = unicode_string.encode('utf-8')
+print(byte_string)  # Output: b'Hello, Unicode!'
+
+# Byte string back to Unicode string
+decoded_string = byte_string.decode('utf-8')
+print(decoded_string)  # Output: Hello, Unicode!
+```
+
+In this case, we are converting a Unicode string (`"Hello, Unicode!"`) to a byte string using `.encode()` and converting it back to a Unicode string using `.decode()`.
+
+---
 
 ### 100. **How does Python’s `multiprocessing` module handle inter-process communication (IPC)?**
-   - **Follow-up**: Can you demonstrate using `Queue`, `Pipe`, or `Manager` to communicate between processes?
+
+Python’s `multiprocessing` module allows communication between processes using various mechanisms:
+- **`Queue`**: A thread-safe queue that can be used for sending messages between processes. It's a FIFO (First-In, First-Out) queue where data can be put into the queue from one process and retrieved from another.
+- **`Pipe`**: Provides a two-way communication channel between processes. Unlike `Queue`, which can be used for multiple producers and consumers, a `Pipe` is simpler and typically used for two-way communication between two processes.
+- **`Manager`**: A manager object that allows processes to share data, such as a list, dictionary, or other objects. It can be used to synchronize access to shared data across processes.
+
+---
+
+**Follow-up:** Can you demonstrate using `Queue`, `Pipe`, or `Manager` to communicate between processes?
+
+```python
+from multiprocessing import Process, Queue
+
+# Function for producing data
+def producer(q):
+    q.put("Data from producer")
+
+# Function for consuming data
+def consumer(q):
+    data = q.get()
+    print(f"Consumer received: {data}")
+
+if __name__ == "__main__":
+    # Create a queue for IPC
+    q = Queue()
+
+    # Create producer and consumer processes
+    p1 = Process(target=producer, args=(q,))
+    p2 = Process(target=consumer, args=(q,))
+
+    # Start processes
+    p1.start()
+    p2.start()
+
+    # Wait for processes to complete
+    p1.join()
+    p2.join()
+```
+
+In this example:
+- A `Queue` is used for communication between two processes (`producer` and `consumer`).
+- The producer process places a message in the queue, which the consumer process retrieves and prints.
+
+This is just one way of handling IPC using `multiprocessing`. Depending on your application's needs, you can choose between `Queue`, `Pipe`, or `Manager`.
+
 
 ### 101. **What are `weakref` and `weak references`, and how are they useful in Python?**
    - **Follow-up**: Can you explain how weak references help manage memory when dealing with large data sets or circular references?
