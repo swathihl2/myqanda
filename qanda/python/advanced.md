@@ -3417,36 +3417,550 @@ In this example:
 This is just one way of handling IPC using `multiprocessing`. Depending on your application's needs, you can choose between `Queue`, `Pipe`, or `Manager`.
 
 
+---
+
 ### 101. **What are `weakref` and `weak references`, and how are they useful in Python?**
-   - **Follow-up**: Can you explain how weak references help manage memory when dealing with large data sets or circular references?
+A **weak reference** is a reference to an object that does not increase the reference count of that object. This means the object can be garbage-collected even if there are weak references pointing to it.
+
+**Why are weak references useful?**
+- **Memory management**: They help avoid memory leaks, especially when tracking objects without keeping them alive.
+- **Circular references**: They can help break circular references to allow garbage collection to clean up the objects.
+- **Caches**: Weak references are often used in cache implementations where cached objects can be freed when not in use.
+
+**Example:**
+```python
+import weakref
+
+class MyClass:
+    def __init__(self, name):
+        self.name = name
+
+# Create an object
+obj = MyClass("Weak Reference Example")
+
+# Create a weak reference to the object
+weak_ref = weakref.ref(obj)
+
+# Access the object via the weak reference
+print(weak_ref())  # Output: <__main__.MyClass object at ...>
+
+# Delete the strong reference to the object
+del obj
+
+# Now the weak reference is None, as the object is no longer alive
+print(weak_ref())  # Output: None
+```
+
+---
+
+**Follow-up:** Can you explain how weak references help manage memory when dealing with large data sets or circular references?
+
+Weak references are particularly useful in managing memory when you don’t want to keep objects alive beyond their usefulness. For large datasets, weak references allow you to track objects without preventing them from being garbage collected when no longer needed. For circular references, weak references can prevent the reference cycle from blocking garbage collection, as the weak reference won’t increase the reference count.
+
+---
 
 ### 102. **How does Python’s `__getitem__`, `__setitem__`, and `__delitem__` methods work?**
-   - **Follow-up**: Can you implement a custom container class that supports item access, modification, and deletion?
+
+- **`__getitem__(self, key)`**: This method is called when an item is accessed using square brackets (`[]`). It retrieves the value associated with the given key.
+  
+- **`__setitem__(self, key, value)`**: This method is called when an item is assigned a value using square brackets (`[]`). It sets the value for the given key.
+  
+- **`__delitem__(self, key)`**: This method is called when an item is deleted using the `del` statement. It removes the item associated with the given key.
+
+**Example:**
+```python
+class MyContainer:
+    def __init__(self):
+        self.data = {}
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+
+    def __delitem__(self, key):
+        del self.data[key]
+
+# Create an instance of the container
+container = MyContainer()
+
+# Use the special methods via regular syntax
+container["name"] = "Python"
+print(container["name"])  # Output: Python
+
+# Delete the item
+del container["name"]
+
+# Attempting to access a deleted item raises KeyError
+# print(container["name"])  # Raises KeyError
+```
+
+---
+
+**Follow-up:** Can you implement a custom container class that supports item access, modification, and deletion?
+
+```python
+class MyContainer:
+    def __init__(self):
+        self.data = {}
+
+    def __getitem__(self, key):
+        if key not in self.data:
+            raise KeyError(f"Key '{key}' not found")
+        return self.data[key]
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+
+    def __delitem__(self, key):
+        if key not in self.data:
+            raise KeyError(f"Key '{key}' not found")
+        del self.data[key]
+
+    def __repr__(self):
+        return f"MyContainer({self.data})"
+
+# Example usage
+container = MyContainer()
+container["apple"] = 10
+container["banana"] = 5
+print(container)  # Output: MyContainer({'apple': 10, 'banana': 5})
+
+del container["apple"]
+print(container)  # Output: MyContainer({'banana': 5})
+```
+
+---
 
 ### 103. **How would you implement a custom logging handler in Python to log messages to a remote server?**
-   - **Follow-up**: Can you provide an example where you subclass `logging.Handler` and write the log entries to a database or API?
 
+To send log messages to a remote server, you can subclass `logging.Handler` and implement the `emit()` method to send the log entries to the server (e.g., via HTTP requests).
+
+**Example:**
+```python
+import logging
+import requests
+
+class RemoteServerHandler(logging.Handler):
+    def __init__(self, server_url):
+        super().__init__()
+        self.server_url = server_url
+
+    def emit(self, record):
+        log_message = self.format(record)
+        try:
+            response = requests.post(self.server_url, data={'message': log_message})
+            response.raise_for_status()
+        except requests.RequestException as e:
+            print(f"Error sending log to server: {e}")
+
+# Set up logging
+logger = logging.getLogger("remoteLogger")
+logger.setLevel(logging.DEBUG)
+remote_handler = RemoteServerHandler("https://example.com/log")
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+remote_handler.setFormatter(formatter)
+logger.addHandler(remote_handler)
+
+# Log a message
+logger.info("This is a test log message.")
+```
+
+In this example, the custom handler `RemoteServerHandler` sends log messages to a remote server via HTTP POST requests.
+
+---
+
+**Follow-up:** Can you provide an example where you subclass `logging.Handler` and write the log entries to a database or API?
+
+```python
+import logging
+import sqlite3
+
+class DatabaseLoggingHandler(logging.Handler):
+    def __init__(self, db_name):
+        super().__init__()
+        self.db_name = db_name
+        self.connection = sqlite3.connect(db_name)
+        self.cursor = self.connection.cursor()
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS logs (message TEXT)")
+
+    def emit(self, record):
+        log_message = self.format(record)
+        self.cursor.execute("INSERT INTO logs (message) VALUES (?)", (log_message,))
+        self.connection.commit()
+
+# Set up logging
+logger = logging.getLogger("dbLogger")
+logger.setLevel(logging.DEBUG)
+db_handler = DatabaseLoggingHandler("logs.db")
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+db_handler.setFormatter(formatter)
+logger.addHandler(db_handler)
+
+# Log a message
+logger.error("An error occurred!")
+```
+
+In this example, `DatabaseLoggingHandler` writes log entries to a SQLite database, ensuring logs are stored persistently.
+
+---
 
 ### 104. **What is the Global Interpreter Lock (GIL) in Python, and how does it affect multi-threading?**
-   - **Follow-up**: How does the GIL impact CPU-bound versus I/O-bound operations, and how can you work around it?
+
+The **Global Interpreter Lock (GIL)** is a mutex (lock) that prevents multiple native threads from executing Python bytecodes simultaneously in a single process. It is used to ensure thread safety in Python, particularly with memory management.
+
+**Effect on multi-threading:**
+- **CPU-bound tasks**: The GIL can be a bottleneck for multi-threaded programs that perform CPU-bound tasks because it limits the execution of threads to one at a time per process.
+- **I/O-bound tasks**: The GIL has less impact on I/O-bound tasks (such as network or disk I/O) because threads can release the GIL during I/O operations, allowing other threads to run concurrently.
+
+**Solution for CPU-bound tasks**: For CPU-bound tasks, using **multiprocessing** is a better option, as each process has its own Python interpreter and GIL.
+
+---
+
+**Follow-up:** How does the GIL impact CPU-bound versus I/O-bound operations, and how can you work around it?
+
+The GIL impacts **CPU-bound** operations by limiting parallelism in multi-threaded programs, making them less efficient for tasks like number crunching. However, **I/O-bound** operations (like network requests, file I/O) are less impacted because the GIL is released during I/O operations, allowing other threads to run.
+
+**Workaround**:
+- **For I/O-bound tasks**: Use multi-threading or **asyncio** for concurrency.
+- **For CPU-bound tasks**: Use **multiprocessing** to bypass the GIL by running separate processes.
+
+```python
+import threading
+
+def io_bound_task():
+    # Simulating I/O-bound task
+    import time
+    time.sleep(2)
+    print("I/O task complete")
+
+# Running in multiple threads
+threads = [threading.Thread(target=io_bound_task) for _ in range(5)]
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
+```
+
+---
 
 ### 105. **Explain the concept of "duck typing" and how it relates to Python’s dynamic typing system.**
-   - **Follow-up**: Can you provide an example of how duck typing works in practice and how it influences the design of Python programs?
+
+**Duck typing** is a concept in programming where an object's suitability is determined by the presence of certain methods and properties, rather than by the object's type itself. The famous phrase "If it looks like a duck and quacks like a duck, it must be a duck" illustrates this.
+
+In Python, **dynamic typing** means that types are determined at runtime, and you don’t need to declare types explicitly. Python cares more about whether an object behaves in the way you expect it to, rather than whether it’s of a specific class.
+
+**Example of Duck Typing:**
+```python
+class Duck:
+    def speak(self):
+        print("Quack!")
+
+class Person:
+    def speak(self):
+        print("Hello!")
+
+def make_speak(thing):
+    thing.speak()  #
+
+ As long as it has a 'speak' method, it works!
+
+duck = Duck()
+person = Person()
+
+make_speak(duck)  # Output: Quack!
+make_speak(person)  # Output: Hello!
+```
+
+---
+
+**Follow-up:** Can you provide an example of how duck typing works in practice and how it influences the design of Python programs?
+
+Duck typing allows you to design flexible code by focusing on behavior rather than explicit type checks. For example, you might create a function that works with any object that has a `.speak()` method, regardless of whether it’s a `Duck`, `Person`, or other objects.
+
+**Example**:
+```python
+class Dog:
+    def speak(self):
+        print("Woof!")
+
+# This function works with any object that has a 'speak' method, regardless of the type
+make_speak(Dog())  # Output: Woof!
+```
+
+---
 
 ### 106. **How does Python handle memory management and garbage collection?**
-   - **Follow-up**: What is reference counting, and how does Python’s garbage collector deal with cyclic references?
+
+Python uses **reference counting** and **garbage collection** (GC) to manage memory.
+
+- **Reference Counting**: Each object has a reference count, which is incremented when a reference to the object is created and decremented when a reference is deleted. When the reference count reaches zero, the object is deallocated.
+- **Garbage Collection**: Python's garbage collector deals with **cyclic references** (when two or more objects reference each other). It periodically scans for cycles and breaks them to release memory.
+
+---
+
+**Follow-up:** What is reference counting, and how does Python’s garbage collector deal with cyclic references?
+
+**Reference counting** is the mechanism that tracks how many references exist to an object. When the reference count hits zero, the object is deleted. Python's garbage collector handles **cyclic references** (e.g., when two objects reference each other) by periodically checking for unreachable objects and breaking the reference cycles.
+
+```python
+import gc
+
+# Enable garbage collection debugging
+gc.set_debug(gc.DEBUG_LEAK)
+
+# Force a collection
+gc.collect()
+```
+
+---
 
 ### 107. **What are Python's "abstract base classes" (ABCs), and how do you implement them?**
-   - **Follow-up**: What is the use of `abc` module in Python, and how does it help enforce interface contracts?
+
+**Abstract Base Classes (ABCs)** in Python provide a way to define common interfaces for a group of related classes. They allow you to enforce certain methods that subclasses must implement. ABCs are useful when you want to ensure that classes follow a certain structure and support specific behaviors without defining all the details in the base class.
+
+The `abc` module provides the tools to create abstract classes. You can use the `ABC` base class and the `@abstractmethod` decorator to mark methods as abstract.
+
+**Example:**
+```python
+from abc import ABC, abstractmethod
+
+class Animal(ABC):
+    @abstractmethod
+    def speak(self):
+        pass
+    
+    @abstractmethod
+    def move(self):
+        pass
+
+class Dog(Animal):
+    def speak(self):
+        print("Woof!")
+    
+    def move(self):
+        print("Running")
+
+# Uncommenting the line below would raise an error, because `Animal` cannot be instantiated directly
+# animal = Animal()
+
+dog = Dog()
+dog.speak()  # Output: Woof!
+dog.move()   # Output: Running
+```
+
+In this example, the `Animal` class is abstract, and any subclass (like `Dog`) must implement the abstract methods `speak()` and `move()`.
+
+---
+
+**Follow-up:** What is the use of the `abc` module in Python, and how does it help enforce interface contracts?
+
+The `abc` module provides a framework for defining abstract base classes in Python. By using `ABC` and `@abstractmethod`, it enforces that certain methods must be implemented in subclasses. This ensures that all subclasses of an abstract base class follow a consistent interface, making it easier to write modular and reusable code.
+
+---
 
 ### 108. **What is the `unittest` module, and how does it differ from `pytest`?**
-   - **Follow-up**: How would you structure a test suite using `unittest` or `pytest` for a large Python application?
+
+The **`unittest`** module is Python’s built-in library for writing and running tests. It provides a framework for organizing tests, setting up test cases, and checking expected outcomes using assertions.
+
+- **Features of `unittest`**:
+  - Organizes tests into classes.
+  - Has a set of built-in assertion methods (`assertEqual`, `assertTrue`, etc.).
+  - Supports test suites for grouping related tests.
+  - Built-in test runner that executes tests.
+
+**Example:**
+```python
+import unittest
+
+def add(a, b):
+    return a + b
+
+class TestMathOperations(unittest.TestCase):
+    def test_add(self):
+        self.assertEqual(add(2, 3), 5)
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+**Differences between `unittest` and `pytest`:**
+- **`pytest`** is a more feature-rich, flexible, and user-friendly testing framework compared to `unittest`. `pytest` can work with existing `unittest` tests, but it offers better support for fixtures, more concise syntax (no need for test classes or setup/teardown methods), and more detailed and readable output.
+
+**Example with `pytest`:**
+```python
+import pytest
+
+def add(a, b):
+    return a + b
+
+def test_add():
+    assert add(2, 3) == 5
+```
+
+- **Key differences**:
+  - `unittest` requires test cases to be written as classes derived from `unittest.TestCase`, while `pytest` allows writing simple functions without needing classes.
+  - `pytest` has better output formatting and more powerful fixtures for setup and teardown.
+  - `pytest` supports parameterized tests more easily than `unittest`.
+
+---
+
+**Follow-up:** How would you structure a test suite using `unittest` or `pytest` for a large Python application?
+
+For a large application, it’s important to organize tests into logical modules. You can structure your test suite by grouping tests based on functionality.
+
+- **With `unittest`**: You can organize tests in separate files or directories, each focusing on different parts of your application. For example:
+  ```
+  tests/
+      __init__.py
+      test_math_operations.py
+      test_string_operations.py
+  ```
+
+  Each test file contains test cases as classes:
+  ```python
+  # test_math_operations.py
+  import unittest
+  from math_operations import add
+  
+  class TestMathOperations(unittest.TestCase):
+      def test_add(self):
+          self.assertEqual(add(1, 1), 2)
+
+  # test_string_operations.py
+  import unittest
+  from string_operations import to_uppercase
+
+  class TestStringOperations(unittest.TestCase):
+      def test_to_uppercase(self):
+          self.assertEqual(to_uppercase("test"), "TEST")
+  ```
+
+- **With `pytest`**: You can simply write test functions in modules:
+  ```
+  tests/
+      test_math_operations.py
+      test_string_operations.py
+  ```
+
+  Each test function starts with `test_`:
+  ```python
+  # test_math_operations.py
+  from math_operations import add
+
+  def test_add():
+      assert add(1, 1) == 2
+
+  # test_string_operations.py
+  from string_operations import to_uppercase
+
+  def test_to_uppercase():
+      assert to_uppercase("test") == "TEST"
+  ```
+
+Both frameworks can be run using their respective test runners, either `python -m unittest discover` for `unittest` or `pytest` for `pytest`.
+
+---
 
 ### 109. **Explain Python's method resolution order (MRO) in the context of multiple inheritance.**
-   - **Follow-up**: How does Python's MRO ensure that methods are called in the correct order? What is the significance of the C3 linearization algorithm?
+
+The **Method Resolution Order (MRO)** determines the order in which methods are inherited in Python, particularly when multiple inheritance is involved. Python uses the **C3 linearization** algorithm to compute the MRO, ensuring a consistent and predictable method lookup order.
+
+**Example of MRO in multiple inheritance:**
+```python
+class A:
+    def greet(self):
+        print("Hello from A")
+
+class B(A):
+    def greet(self):
+        print("Hello from B")
+
+class C(A):
+    def greet(self):
+        print("Hello from C")
+
+class D(B, C):
+    pass
+
+# The MRO for class D
+print(D.__mro__)
+```
+
+**Output:**
+```
+(<class '__main__.D'>, <class '__main__.B'>, <class '__main__.C'>, <class '__main__.A'>, <class 'object'>)
+```
+
+Here, the MRO for `D` is computed as:
+1. `D`
+2. `B` (the first class in the inheritance order)
+3. `C` (the second class)
+4. `A` (the superclass of both `B` and `C`)
+5. `object` (the base class of all Python classes)
+
+In this example, the `greet()` method from class `B` will be called because `D` inherits from `B` first.
+
+---
+
+**Follow-up:** How does Python's MRO ensure that methods are called in the correct order? What is the significance of the C3 linearization algorithm?
+
+The MRO ensures that methods are called in a consistent order by using the **C3 linearization** algorithm. This algorithm respects the inheritance hierarchy and ensures that base classes are not repeated. It first considers the order of base classes in the inheritance list and then ensures that the method lookup follows a "left-to-right" approach, while also respecting the inheritance structure of each class.
+
+**Significance**:
+- The C3 algorithm ensures that the method resolution respects the inheritance order and avoids conflicts between classes in the inheritance chain.
+- It guarantees that classes are only visited once, and each class has a defined order in which its methods will be checked.
+
+---
 
 ### 110. **What is the `asyncio` event loop, and how does it differ from multi-threading or multi-processing in Python?**
-   - **Follow-up**: How does `asyncio` handle blocking I/O, and how do you manage concurrent tasks efficiently in an asynchronous environment?
+
+The **`asyncio` event loop** is the core of Python's asynchronous programming model. It allows for concurrent execution of code in a single thread by switching between tasks without blocking. Tasks are scheduled to run asynchronously, and the event loop manages their execution.
+
+- **Event Loop**: The event loop continuously runs, executing tasks and waiting for I/O operations (such as file or network I/O) to complete.
+- **Asynchronous I/O**: Unlike multi-threading, the `asyncio` event loop does not require multiple threads or processes. It runs on a single thread and uses cooperative multitasking to handle I/O-bound operations efficiently.
+  
+**Differences from multi-threading and multi-processing**:
+- **Multi-threading**: Involves multiple threads that share the same memory space, but due to the GIL, Python threads are not able to run simultaneously on multiple CPU cores for CPU-bound tasks.
+- **Multi-processing**: Involves multiple processes, each with its own memory space and Python interpreter. This is ideal for CPU-bound tasks but involves more overhead than `asyncio` due to process creation and inter-process communication.
+- **Asyncio**: Works within a single thread, using an event loop to handle I/O-bound tasks. It’s more efficient for I/O-bound tasks but not suitable for CPU-bound operations (unless using an external library or multi-threading).
+
+**Example:**
+```python
+import asyncio
+
+async def fetch_data():
+    print("Start fetching")
+    await asyncio.sleep(2)  # Simulate I/O
+    print("Done fetching")
+
+async def main():
+    task = asyncio.create_task(fetch_data())
+    await task
+
+# Run the event loop
+asyncio.run(main())
+```
+
+In this example, `asyncio` allows the `fetch_data()` function to run asynchronously, freeing up the event loop to execute other tasks (if any
+
+) while waiting for I/O.
+
+---
+
+**Follow-up:** How does `asyncio` handle blocking I/O, and how do you manage concurrent tasks efficiently in an asynchronous environment?
+
+`asyncio` handles blocking I/O by using the `await` keyword to yield control back to the event loop, allowing other tasks to run while waiting for I/O operations (like reading a file or making a network request) to complete. If an I/O operation blocks the event loop, it can be wrapped in asynchronous I/O libraries or offloaded to separate threads or processes to prevent blocking.
+
+To manage concurrent tasks efficiently, you can:
+- Use `asyncio.gather()` to run multiple tasks concurrently.
+- Use `asyncio.create_task()` to schedule tasks.
+- Leverage libraries like `aiohttp` or `aiomysql` for non-blocking network and database operations.
+
+---
+
+
 
 ### 111. **How does Python's `yield from` work in generators, and how is it different from `yield`?**
    - **Follow-up**: Can you show an example of how `yield from` simplifies the use of nested generators?
