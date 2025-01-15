@@ -2,15 +2,15 @@
 
 # 2) Explain how you implemented the auto-save functionality in PowerChart.
 
-The ask from the customer was when the application loads freshly first time it should fecthing the previously stored data and it should be saved automatically very that moment.
-after the every change on that documented will going to add to changed state and for every 5 seconds it will be saved. so to get this feature whether the feature is enabled or not, I took an advantage of settings api which will give the inforamtion about the users flag and I stored all those required flags into our cahce. when the user visit again or refresh the page the settings will be pulled form the cache so it avoided unnecessory call of API's and I introduced one more lock flag which make ensure the save functionality will be won't get conflicted.
+The requirement from the customer was that when the application loads for the first time, it should fetch the previously stored data and save it automatically at that moment. After every change to the document, the changes should be added to a "changed" state, and every 5 seconds, the changes would be saved. To implement this feature, I utilized the settings API to check whether the feature is enabled, and stored the relevant flags in our cache. This approach ensures that, on subsequent visits or page refreshes, the settings are pulled from the cache, avoiding unnecessary API calls. Additionally, I introduced a lock flag to ensure that the save functionality doesn’t get conflicted.
 
 
 
 
 # 3) For your speech emotion detection project, how did you handle audio preprocessing?
 
-Yeah for the speech emothion detection we used the audio preprocessing. when the user is speaking we used the ffmpeg to capture the audio and stored in the unique pattren of the audio stream like a fixed sample rate and the mono channel so which makes the data will remain stable in quality. after we used the mel frame resizing to reduce the noise and padded the data with help of max pooling math function. at the final stage of the preprocessing we flattern the data into single 1D stream and passed to the nueral netowrk.
+
+For speech emotion detection, we implemented audio preprocessing techniques. When the user speaks, we use FFmpeg to capture the audio and store it in a unique pattern with a fixed sample rate and mono channel, ensuring the data remains stable in quality. After capturing the audio, we applied mel frame resizing to reduce noise and padded the data using a max pooling function. In the final stage of preprocessing, we flattened the data into a single 1D stream and passed it to the neural network for emotion detection.
 
 
 # 4) How do you optimize loops and database interactions in a Ruby application?
