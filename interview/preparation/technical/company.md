@@ -10,6 +10,8 @@ after the every change on that documented will going to add to changed state and
 
 # 3) For your speech emotion detection project, how did you handle audio preprocessing?
 
+Yeah for the speech emothion detection we used the audio preprocessing. when the user is speaking we used the ffmpeg to capture the audio and stored in the unique pattren of the audio stream like a fixed sample rate and the mono channel so which makes the data will remain stable in quality. after we used the mel frame resizing to reduce the noise and padded the data with help of max pooling math function. at the final stage of the preprocessing we flattern the data into single 1D stream and passed to the nueral netowrk.
+
 
 # 4) How do you optimize loops and database interactions in a Ruby application?
 
