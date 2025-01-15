@@ -17,6 +17,7 @@
 **Procedural Programming (PP)** focuses on writing a series of instructions or functions that operate on data. It emphasizes tasks and actions.  
 **Example**: In a procedural approach, you might have functions like `deposit()` and `withdraw()` that operate on data stored in variables.
 
+
 **Object-Oriented Programming (OOP)** focuses on organizing code around "objects" that combine data and methods. It emphasizes real-world entities and behaviors.  
 **Example**: In OOP, you'd create a `BankAccount` class that has methods like `deposit()` and `withdraw()` and stores account data (balance) within objects.
 
@@ -27,6 +28,8 @@
 In React, state is used to track data that changes over time, like user inputs or API responses. 
 
 - **`useState`**: Used to declare state in functional components. It allows you to create state variables and update them.
+
+- 
   - **Example**:
     ```javascript
     const [count, setCount] = useState(0); 
@@ -34,6 +37,8 @@ In React, state is used to track data that changes over time, like user inputs o
     `count` is the state variable, and `setCount` is the function to update it.
 
 - **`useEffect`**: Used to handle side effects like fetching data, setting up event listeners, or cleaning up resources after a component is rendered.
+
+- 
   - **Example**:
     ```javascript
     useEffect(() => {
@@ -132,4 +137,3 @@ This reduced load times and improved the overall user experience.
 
 ---
 
-These answers should help you prepare for the interview with clear, simple explanations and examples! Let me know if you need further details.
