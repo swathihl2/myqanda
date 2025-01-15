@@ -46,39 +46,7 @@ To optimize CSS for performance and maintainability, I focus on the following st
 
 ### 2. **Can you describe a challenging UI issue you faced and how you resolved it?**
 
-**Challenge**: I was working on a responsive design where an image gallery didn’t align properly across various screen sizes. On larger screens, the images were stretched, and on smaller screens, they were too small and didn’t fill the space effectively.
-
-**Solution**:
-1. **Used Flexbox/Grid Layout**: I replaced the previous fixed-width layouts with Flexbox to make the gallery responsive and fluid.
-   - **Example**: 
-     ```css
-     .gallery {
-       display: flex;
-       flex-wrap: wrap;
-       justify-content: space-around;
-     }
-     .gallery-item {
-       flex: 1 1 100px; /* Ensures items grow and shrink while maintaining a min width */
-       margin: 10px;
-     }
-     ```
-2. **Responsive Images**: I used the `srcset` attribute to load different image sizes based on the screen size and resolution.
-   - **Example**: 
-     ```html
-     <img srcset="image-small.jpg 300w, image-medium.jpg 600w, image-large.jpg 1200w" alt="gallery image">
-     ```
-
-3. **Media Queries**: I added breakpoints to ensure the layout adjusted properly on different screen sizes.
-   - **Example**: 
-     ```css
-     @media (max-width: 600px) {
-       .gallery-item {
-         flex-basis: 100%; /* Each image takes up full width on small screens */
-       }
-     }
-     ```
-
-After making these changes, the gallery became responsive, visually appealing, and consistent across devices.
+**Challenge**: ----PENDING----
 
 ---
 
