@@ -2,8 +2,8 @@
 
 # 2) Explain how you implemented the auto-save functionality in PowerChart.
 
-The ask from the customer was when the application loads freshly it should be saved automatically and fecthing the previously stored data very that moment. 
-so to get the feature is enabled or not I took a advantage of settings api which will give the inforamtion about the users flag and I stored all those required flags into our cahce. when the user visit again or refresh the page the settings will be pulled form the cache so it avoided unnecessory call of API's and I introduced one more lock flag which make ensure the save functionality will be won't get conflicted.
+The ask from the customer was when the application loads freshly first time it should fecthing the previously stored data and it should be saved automatically very that moment.
+after the every change on that documented will going to add to changed state and for every 5 seconds it will be saved. so to get this feature whether the feature is enabled or not, I took an advantage of settings api which will give the inforamtion about the users flag and I stored all those required flags into our cahce. when the user visit again or refresh the page the settings will be pulled form the cache so it avoided unnecessory call of API's and I introduced one more lock flag which make ensure the save functionality will be won't get conflicted.
 
 
 
