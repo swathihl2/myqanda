@@ -11,7 +11,7 @@
 ### 1. **What is your experience with deploying applications on AWS? Can you outline the steps for deploying a microservice?**
 
 **Experience with AWS**:
-In my experience with deploying applications on AWS, I have worked with a variety of services including EC2, ECS, Lambda, RDS, and S3. I've used AWS to deploy both monolithic and microservices-based applications. Typically, for microservices, I use services like **Elastic Container Service (ECS)**, **API Gateway**, **Lambda**, and **RDS** for database management, as well as **CloudWatch** for monitoring.
+In my experience with deploying applications on AWS, I have worked with a variety of services including EC2, Lambda, ECS, RDS, DynamoDB, and S3. I've used AWS to deploy microservices applications. 
 
 **Steps for Deploying a Microservice on AWS**:
 
@@ -20,7 +20,7 @@ In my experience with deploying applications on AWS, I have worked with a variet
 
 2. **Containerize Microservices**:
    - Use **Docker** to containerize each microservice. Create a `Dockerfile` for each service, defining the environment and dependencies.
-   - **Example Dockerfile**:
+   - **Example for a simple Dockerfile**:
      ```dockerfile
      FROM node:14
      WORKDIR /app
