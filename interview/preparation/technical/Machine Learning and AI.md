@@ -15,7 +15,7 @@
 To implement a speech emotion detection system, the following steps can be followed:
 
 1. **Data Collection**:
-   - Gather a dataset of labeled audio recordings with various emotional expressions (e.g., happy, sad, angry, neutral). Some popular datasets include **RAVDESS**, **EmoDB**, and **TESS**.
+   - Gather a dataset of labeled audio recordings with various emotional expressions (e.g., happy, sad, angry, neutral). Some popular datasets include **RAVDESS**, and **TESS**.
    
 2. **Preprocessing**:
    - **Feature Extraction**: Convert audio files into numerical features that represent the emotional tone. Commonly used features include:
