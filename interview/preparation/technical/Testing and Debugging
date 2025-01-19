@@ -8,9 +8,13 @@
 
 ### 1. **What is the purpose of WDIO frameworks in UI testing?**
 
-WDIO (WebDriverIO) is a testing framework used for automating interactions with web applications. Its main purpose is to allow you to write tests that simulate how users would interact with a website, like clicking buttons, filling forms, or verifying content. 
-
-For example, if you're testing an e-commerce site, you can use WDIO to automate tasks like adding items to a shopping cart, checking the total price, and verifying that the checkout process works correctly. This helps ensure that the UI behaves as expected and reduces the need for manual testing.
+WDIO (WebDriverIO) is a testing framework used for automating interactions with web applications. 
+Its main purpose is to allow you to write tests that simulate how users would interact with a website, 
+like clicking buttons, filling forms, or verifying content. 
+For example, if you're testing an e-commerce site, 
+you can use WDIO to automate tasks like adding items to a shopping cart, 
+checking the total price, and verifying that the checkout process works correctly. 
+This helps ensure that the UI behaves as expected and reduces the need for manual testing.
 
 WDIO supports both unit testing and end-to-end testing, making it useful for both developers and QA engineers.
 
