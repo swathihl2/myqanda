@@ -14,12 +14,21 @@
 
 ### 1. **Explain the differences between procedural programming and object-oriented programming.**
 
-**Procedural Programming (PP)** focuses on writing a series of instructions or functions that operate on data. It emphasizes tasks and actions.  
-**Example**: In a procedural approach, you might have functions like `deposit()` and `withdraw()` that operate on data stored in variables.
+| **Aspect**                 | **Procedural Programming**                                  | **Object-Oriented Programming (OOP)**                        |
+|----------------------------|-------------------------------------------------------------|-------------------------------------------------------------|
+| **Fundamental Concept**     | Focuses on **functions** or **procedures**                   | Focuses on **objects** that are instances of **classes**     |
+| **Data and Functions**      | Data and functions are separate                             | Data and functions (methods) are encapsulated within objects |
+| **State and Behavior**      | State (data) and behavior (functions) are separate          | State (attributes) and behavior (methods) are bundled in objects |
+| **Modularity and Reusability** | Functions can be reused, but may become hard to maintain as complexity grows | Objects and classes are modular and reusable through inheritance and polymorphism |
+| **Abstraction**             | Achieved by hiding logic within functions                    | Achieved through classes, which expose only necessary details via public methods |
+| **Code Organization**       | Organized into functions and global variables               | Organized into objects and classes representing real-world entities |
+| **Approach to Problem-Solving** | Top-down approach: start from the overall task, break it into smaller tasks (functions) | Bottom-up approach: model real-world entities and their interactions |
+| **Example**                 | ```c\nint calculateArea(int width, int height) {\nreturn width * height;\n}``` | ```python\nclass Rectangle:\n def __init__(self, width, height):\n self.width = width\n self.height = height\n def calculate_area(self):\n return self.width * self.height\n``` |
+| **Advantages**              | Simpler and more straightforward for small programs; faster for simple tasks | Better suited for large, complex systems; easier maintenance and extension; encourages modularity and data protection |
+| **Disadvantages**           | Can become messy and hard to maintain for larger programs; lacks data protection | Can introduce unnecessary complexity for small tasks; requires more initial design work |
+| **Common Use Cases**        | Small programs, scripts, simple algorithms                   | Large systems, GUI applications, games, enterprise software |
+| **Examples of Languages**   | C, Pascal, Fortran, BASIC                                  | Java, C++, Python, C#, Ruby, Swift                           |
 
-
-**Object-Oriented Programming (OOP)** focuses on organizing code around "objects" that combine data and methods. It emphasizes real-world entities and behaviors.  
-**Example**: In OOP, you'd create a `BankAccount` class that has methods like `deposit()` and `withdraw()` and stores account data (balance) within objects.
 
 ---
 
