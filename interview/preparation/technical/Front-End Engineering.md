@@ -47,12 +47,6 @@ To optimize CSS for performance and maintainability, I focus on the following st
 
 ### 2. **Can you describe a challenging UI issue you faced and how you resolved it?**
 
-Sure! Here's a simplified version of the answer:
-
----
-
-### 2. **Can you describe a challenging UI issue you faced and how you resolved it?**
-
 **Challenge**:
 1. **Zero-width space issues in footnote tags**: 
    - I had trouble finding hidden spaces in footnotes that were causing layout problems. To fix it, I had to carefully debug the code and look for these invisible spaces that were messing up the design.
