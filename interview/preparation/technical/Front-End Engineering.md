@@ -12,10 +12,10 @@
 
 To optimize CSS for performance and maintainability, I focus on the following strategies:
 
-1. **Minify and Compress CSS**: Minifying CSS removes unnecessary characters (like spaces and comments) to reduce the file size, speeding up load times.
+1. **Minify and Compress CSS**: I will remove the unnecessary characters (like spaces and comments) to reduce the file size, speeding up load times.
    - **Example**: Tools like `cssnano` or using build tools like Webpack to minify CSS files.
    
-2. **Use CSS Preprocessors (e.g., SASS/LESS)**: These allow for better code organization with variables, nesting, and mixins, making the CSS easier to manage and extend.
+3. **Use CSS Preprocessors (e.g., SASS/LESS)**: I usually follow adding with variables, nesting, and mixins, making the CSS easier to manage and extend.
    - **Example**: 
      ```scss
      $primary-color: #333;
@@ -24,7 +24,8 @@ To optimize CSS for performance and maintainability, I focus on the following st
      }
      ```
 
-3. **CSS Modularization**: Break down CSS into smaller, reusable components (e.g., BEM or CSS Modules). This avoids code duplication and makes the CSS more maintainable.
+4. **CSS Modularization**: I prefer the styles in smaller as reusable components (e.g., BEM or CSS Modules).
+                    This avoids code duplication and makes the CSS more maintainable.
    - **Example**: 
      ```scss
      .button {
@@ -33,20 +34,22 @@ To optimize CSS for performance and maintainability, I focus on the following st
      }
      ```
 
-4. **Remove Unused CSS**: Use tools like PurifyCSS or Tree-shaking in Webpack to remove unused CSS, reducing the size of the final bundle.
+6. **Remove Unused CSS**: I do use tools like PurifyCSS or Tree-shaking in Webpack to remove unused CSS, reducing the size of the final bundle.
    
-5. **Avoid Over-Specific Selectors**: Use classes over IDs or overly specific selectors to make the CSS more maintainable and easier to override.
+7. **Avoid Over-Specific Selectors**: I do use classes over IDs or overly specific selectors to make the CSS more maintainable and easier to override.
    - **Example**: Instead of `#header .nav .item`, use `.nav-item`.
 
-6. **Use CSS Grid and Flexbox for Layouts**: These modern layout techniques help avoid heavy use of floats, which can lead to complex and difficult-to-maintain CSS.
+8. **Use CSS Grid and Flexbox for Layouts**: These modern layout techniques help avoid heavy use of floats, which can lead to complex and difficult-to-maintain CSS.
 
-7. **Critical CSS**: Inline the critical CSS for above-the-fold content to improve the initial page load speed. Tools like `Critical` can automate this.
+9. **Critical CSS**: Inline the critical CSS for above-the-fold content to improve the initial page load speed. Tools like `Critical` can automate this.
 
 ---
 
 ### 2. **Can you describe a challenging UI issue you faced and how you resolved it?**
 
-**Challenge**: ----PENDING----
+**Challenge**: 
+
+
 
 ---
 
